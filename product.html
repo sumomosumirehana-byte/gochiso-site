@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品詳細｜ごちそうスタイル</title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo"><img src="images/logo.png" alt="ごちそうスタイル" class="logo-img"><span class="logo-text">ごちそうスタイル</span></a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNav">
+      <ul>
+        <li><a href="products.html">お取り寄せ</a></li>
+        <li class="has-dropdown">
+          <a href="#">ご依頼・ご相談 ▾</a>
+          <ul class="dropdown">
+            <li><a href="request-feature.html">商品掲載・紹介のご依頼</a></li>
+            <li><a href="request-dispatch.html">催事への販売員派遣のご依頼</a></li>
+            <li><a href="request-exhibition.html">催事出展のご相談</a></li>
+          </ul>
+        </li>
+        <li><a href="recruit.html">販売員募集</a></li>
+        <li><a href="company.html">会社概要</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Page Hero (JS で書き換え) ===== -->
+<div class="page-hero" id="product-hero">
+  <div class="breadcrumb">
+    <a href="index.html">ホーム</a>
+    <span>›</span>
+    <a href="products.html">お取り寄せ</a>
+    <span>›</span>
+    <span id="hero-title">読み込み中...</span>
+  </div>
+  <h1 id="hero-h1">読み込み中...</h1>
+</div>
+
+<!-- ===== Product Detail (JS で描画) ===== -->
+<section class="section">
+  <div class="container">
+    <div id="product-detail">
+      <p style="color:var(--text-muted);text-align:center;">読み込み中...</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Back to List ===== -->
+<div style="text-align:center;padding:0 var(--px) 4rem;">
+  <a href="products.html" class="btn btn-outline">← お取り寄せ一覧に戻る</a>
+</div>
+
+<!-- ===== CTA ===== -->
+<section class="cta-banner">
+  <div class="container">
+    <span class="section-label">FOR BRANDS</span>
+    <h2>商品を紹介してほしい方へ</h2>
+    <p>ごちそうスタイルで商品を紹介しませんか。<br>お気軽にご相談ください。</p>
+    <div class="btn-group">
+      <a href="request-feature.html" class="btn btn-primary">商品掲載のご依頼はこちら</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">ごちそうスタイル</span>
+        <p>全国の食品メーカーやブランドの「おいしい！」を発信するYouTubeチャンネル。<br>インフィニスタイル株式会社が運営しています。</p>
+      </div>
+      <div class="footer-nav">
+        <h4>コンテンツ</h4>
+        <ul>
+          <li><a href="products.html">お取り寄せ紹介</a></li>
+          <li><a href="https://www.youtube.com/@gochiso-style" target="_blank" rel="noopener">YouTube</a></li>
+          <li><a href="https://www.instagram.com/infinistyle/" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>ご依頼・採用</h4>
+        <ul>
+          <li><a href="request-feature.html">商品掲載のご依頼</a></li>
+          <li><a href="request-dispatch.html">販売員派遣のご依頼</a></li>
+          <li><a href="request-exhibition.html">催事出展のご相談</a></li>
+          <li><a href="recruit.html">販売員募集</a></li>
+        </ul>
+      </div>
+    </div>
+      <div class="footer-nav">
+        <h4>会社情報</h4>
+        <ul>
+          <li><a href="company.html">会社概要</a></li>
+          <li><a href="#">プライバシーポリシー</a></li>
+        </ul>
+      </div>
+    </div><!-- /.footer-top -->
+    <div class="footer-bottom">
+      <p>© 2025 インフィニスタイル株式会社</p>
+      <div class="footer-links"><a href="#">プライバシーポリシー</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
