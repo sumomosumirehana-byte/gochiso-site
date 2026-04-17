@@ -12,11 +12,7 @@
     "purchaseUrl": "https://www.b-cre.net/product-list/43",
     "purchaseType": "online",
     "officialUrl": "https://www.b-cre.net",
-    "images": [
-      "https://picsum.photos/seed/manuka1/800/600",
-      "https://picsum.photos/seed/manuka2/800/600",
-      "https://picsum.photos/seed/manuka3/800/600"
-    ],
+    "images": [],
     "emoji": "🍯",
     "featured": true
   },

@@ -48,16 +48,29 @@ function formatPrice(p) {
   return `¥${p.price.toLocaleString()}（税込）`;
 }
 
+// YouTube URL から動画IDを抽出してサムネイルURLを生成
+function getYtThumb(url) {
+  if (!url) return '';
+  const m = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` : '';
+}
+
 function renderCard(p, compact = false) {
   const thumbClass = p.category === 'sweets' ? 'thumb-sweets' : 'thumb-meal';
   const tagClass   = p.category === 'sweets' ? 'tag-sweets' : 'tag-meal';
   const tagLabel   = p.category === 'sweets' ? 'スイーツ' : 'お食事';
   const detailUrl  = `./product.html?id=${p.id}`;
 
+  // サムネイル: images[0] → YouTubeサムネイル → emoji の優先順
+  const imgSrc = (p.images && p.images.length > 0) ? p.images[0] : getYtThumb(p.youtube);
+  const thumbInner = imgSrc
+    ? `<img src="${imgSrc}" alt="${p.title}" loading="lazy">`
+    : p.emoji;
+
   if (compact) {
     return `
       <a href="${detailUrl}" class="product-card" data-category="${p.category}">
-        <div class="product-thumb ${thumbClass}">${p.emoji}</div>
+        <div class="product-thumb ${thumbClass}">${thumbInner}</div>
         <div class="product-body">
           <span class="tag ${tagClass}">${tagLabel}</span>
           <h3>${p.title}</h3>
@@ -79,7 +92,7 @@ function renderCard(p, compact = false) {
   return `
     <div class="product-card" id="${p.id}" data-category="${p.category}">
       <a href="${detailUrl}" style="display:block;color:inherit;">
-        <div class="product-thumb ${thumbClass}">${p.emoji}</div>
+        <div class="product-thumb ${thumbClass}">${thumbInner}</div>
       </a>
       <div class="product-body">
         <span class="tag ${tagClass}">${tagLabel}</span>
