@@ -1288,6 +1288,12 @@ select {
   margin-bottom: 3rem;
   text-align: center;
 }
+.cert-grade-heading--2 {
+  background: linear-gradient(90deg, #fffbf0, #fff4d6);
+}
+.cert-grade-heading--2 .cgh-kyu {
+  color: #a07800;
+}
 .cert-grade-heading-inner {
   max-width: var(--max-w);
   margin: 0 auto;
