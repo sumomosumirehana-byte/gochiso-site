@@ -1417,12 +1417,8 @@ select {
   border: 1px solid var(--border-light);
 }
 .cert-merit-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 90px;
+  height: 8px;
 }
-.cert-merit-icon { font-size: 2.8rem; line-height: 1; }
 .cert-merit-body { padding: 1.5rem; }
 .cert-merit-body h4 { font-size: 1rem; margin-bottom: 0.6rem; }
 .cert-merit-body p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.75; }
