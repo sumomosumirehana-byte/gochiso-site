@@ -1278,34 +1278,42 @@ select {
   padding: 0.1rem 0;
 }
 
-/* ---- Section grade badge header ---- */
-.cert-section-badge {
+/* ---- Grade section ---- */
+.cert-grade-section { padding-top: 0; }
+
+/* 全幅背景ヘッダー */
+.cert-grade-heading {
+  background: var(--accent-light);
+  padding: 2.5rem var(--px);
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.cert-grade-heading-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  padding: 1.25rem 2rem;
-  border-radius: 14px;
+  gap: 0.5rem;
 }
-.cert-section-badge--2 {
-  background: linear-gradient(90deg, #fff8d6, #fffdf0);
-  border-left: 6px solid #d4a800;
-}
-.cert-section-badge--1 {
-  background: linear-gradient(90deg, #ffe8e8, #fff8f8);
-  border-left: 6px solid var(--accent);
-}
-.csb-kyu {
+.cgh-kyu {
+  display: inline-block;
   font-family: var(--font-serif);
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 600;
+  color: var(--accent-hover);
   line-height: 1;
-  flex-shrink: 0;
 }
-.cert-section-badge--2 .csb-kyu { color: #a07800; }
-.cert-section-badge--1 .csb-kyu { color: var(--accent-hover); }
-.csb-text h2 { font-size: 1.25rem; margin-bottom: 0.25rem; }
-.csb-text p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+.cgh-text h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.3rem;
+  color: var(--text);
+}
+.cgh-text p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
 
 /* ---- Flow cards (horizontal step) ---- */
 .cert-flow {
@@ -1337,10 +1345,9 @@ select {
   transition: box-shadow var(--transition);
 }
 .cert-flow-card:hover { box-shadow: var(--shadow-md); }
-.cert-flow-card--1kyu { border-color: #ffcece; }
 .cert-flow-card--test {
-  background: #f6fff6;
-  border-color: #88cc88;
+  border-color: var(--accent);
+  border-width: 2px;
 }
 .cfc-icon { font-size: 2.2rem; line-height: 1; }
 .cfc-step {
@@ -1352,8 +1359,7 @@ select {
   padding: 0.2rem 0.65rem;
   border-radius: 20px;
 }
-.cfc-step--1kyu { background: #ffe4e4; color: var(--accent-hover); }
-.cfc-step--test { background: #d4f0d4; color: #2e7d2e; }
+.cfc-step--test { background: var(--accent); color: #fff; }
 .cfc-title {
   font-family: var(--font-serif);
   font-size: 1rem;
@@ -1539,6 +1545,6 @@ select {
   .cert-case-card { grid-template-columns: 1fr; }
   .cert-case-left { border-right: none; border-bottom: 1px solid var(--border-light); }
   .cert-case-right { padding: 1.5rem; }
-  .cert-section-badge { padding: 1rem 1.25rem; gap: 1rem; }
-  .csb-kyu { font-size: 2.5rem; }
+  .cgh-kyu { font-size: 2.2rem; }
+  .cgh-text h2 { font-size: 1.1rem; }
 }
