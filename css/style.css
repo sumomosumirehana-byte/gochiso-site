@@ -1278,6 +1278,98 @@ select {
   padding: 0.1rem 0;
 }
 
+/* ---- FV直下 グレードカード 横並び ---- */
+.cert-fv-grades {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.cert-fv-card {
+  display: flex;
+  flex-direction: column;
+}
+.cert-fv-card--2 { background: #fffbf0; }
+.cert-fv-card--1 { background: #fff6f6; }
+
+.cfvc-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--border-light);
+}
+.cfvc-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.cert-fv-card:hover .cfvc-photo img { transform: scale(1.03); }
+
+.cfvc-body {
+  padding: 2rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+.cfvc-kyu {
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.cert-fv-card--2 .cfvc-kyu { color: #a07800; }
+.cert-fv-card--1 .cfvc-kyu { color: var(--accent-hover); }
+
+.cfvc-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+.cfvc-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin: 0;
+}
+.cfvc-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+}
+.cfvc-list li {
+  font-size: 0.88rem;
+  color: var(--text);
+  padding-left: 1rem;
+  position: relative;
+}
+.cfvc-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+.cfvc-price {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-light);
+  margin-top: auto;
+}
+.cfvc-price strong { color: var(--text); }
+
+@media (max-width: 768px) {
+  .cert-fv-grades { grid-template-columns: 1fr; }
+  .cfvc-body { padding: 1.5rem; }
+}
+
 /* ---- Step Flow (FLOW セクション) ---- */
 .csf-label {
   display: inline-block;
