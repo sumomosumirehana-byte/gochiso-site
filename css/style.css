@@ -1284,13 +1284,17 @@ select {
 .cert-fv-grades {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
-  width: 100%;
-  margin-bottom: 4rem;
+  gap: 1.5rem;
+  max-width: var(--max-width);
+  margin: 0 auto 4rem;
+  padding: 0 var(--px);
 }
 .cert-fv-card {
   display: flex;
   flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 .cert-fv-card--2 { background: #fffbf0; }
 .cert-fv-card--1 { background: #fff6f6; }
