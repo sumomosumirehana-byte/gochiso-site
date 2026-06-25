@@ -9,11 +9,11 @@
     "priceNote": "価格・購入リンクを更新してください",
     "category": "sweets",
     "youtube": "https://youtu.be/-nYxZJa7i30",
-    "purchaseUrl": "https://www.b-cre.net/product-list/43",
+    "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "https://www.b-cre.net",
     "images": [],
     "emoji": "🍯",
+    "published": true,
     "featured": true
   },
   {
@@ -62,10 +62,10 @@
     "youtube": "https://youtu.be/07SR5OXSgWI",
     "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "",
     "images": [],
     "emoji": "🍞",
-    "featured": true
+    "published": true,
+    "featured": false
   },
   {
     "id": "special-pudding",
@@ -79,10 +79,10 @@
     "youtube": "https://youtu.be/scd8HRq3SUM",
     "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "",
     "images": [],
     "emoji": "🍮",
-    "featured": true
+    "published": true,
+    "featured": false
   },
   {
     "id": "ginger-sweets",
@@ -96,10 +96,10 @@
     "youtube": "https://youtu.be/N8XIuztdp3M",
     "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "",
     "images": [],
     "emoji": "🫚",
-    "featured": true
+    "published": true,
+    "featured": false
   },
   {
     "id": "pork-bowl-sauce",
@@ -130,10 +130,10 @@
     "youtube": "https://youtu.be/fWb4-B9hmjU",
     "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "",
     "images": [],
     "emoji": "🍜",
-    "featured": true
+    "published": true,
+    "featured": false
   },
   {
     "id": "tokushima-ramen",
@@ -147,9 +147,9 @@
     "youtube": "https://youtu.be/cDftBTPjn1w",
     "purchaseUrl": "",
     "purchaseType": "online",
-    "officialUrl": "",
     "images": [],
     "emoji": "🍜",
+    "published": true,
     "featured": true
   },
   {
