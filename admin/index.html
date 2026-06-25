@@ -70,6 +70,8 @@
     .b-news{background:#f0fdf4;color:#166534}
     .b-event{background:#faf5ff;color:#6b21a8}
     .b-yes{background:#dcfce7;color:#166534}
+    .b-pub{background:#dcfce7;color:#166534}
+    .b-draft{background:#f3f4f6;color:#6b7280}
 
     /* Modal */
     .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;overflow-y:auto;padding:2rem 1rem}
@@ -170,7 +172,7 @@
         </div>
         <table class="tbl">
           <thead><tr>
-            <th>商品名</th><th>カテゴリ</th><th>価格</th><th>おすすめ</th><th>操作</th>
+            <th>商品名</th><th>カテゴリ</th><th>価格</th><th>状態</th><th>おすすめ</th><th>操作</th>
           </tr></thead>
           <tbody id="products-body"></tbody>
         </table>
@@ -252,7 +254,11 @@
         <label class="img-add-label" for="p-images-input" title="画像を追加">＋</label>
       </div>
     </div>
-    <div class="fg full">
+    <div class="fg full" style="display:flex;gap:2rem;flex-wrap:wrap">
+      <div class="cb-row">
+        <input type="checkbox" id="p-published" checked>
+        <label for="p-published">公開する</label>
+      </div>
       <div class="cb-row">
         <input type="checkbox" id="p-featured">
         <label for="p-featured">おすすめ商品（TOPページに表示）</label>
@@ -464,6 +470,7 @@ function renderProducts() {
       <td><div class="trunc">${p.emoji||''} ${p.title}</div></td>
       <td><span class="badge ${p.category==='sweets'?'b-sweets':'b-meal'}">${p.category==='sweets'?'スイーツ':'お食事'}</span></td>
       <td>${p.price ? '¥'+p.price.toLocaleString() : '—'}</td>
+      <td>${p.published===false?'<span class="badge b-draft">非公開</span>':'<span class="badge b-pub">公開</span>'}</td>
       <td>${p.featured?'<span class="badge b-yes">★</span>':''}</td>
       <td><div class="tbl-actions">
         <button class="btn btn-outline btn-sm" onclick="editProduct(${i})">編集</button>
@@ -491,6 +498,7 @@ function openProductModal(idx = null) {
     document.getElementById('p-youtube').value = p.youtube || '';
     document.getElementById('p-purchase-url').value = p.purchaseUrl || '';
     document.getElementById('p-purchase-type').value = p.purchaseType || 'online';
+    document.getElementById('p-published').checked = p.published !== false;
     document.getElementById('p-featured').checked = !!p.featured;
     pExistImages = Array.isArray(p.images) ? [...p.images] : [];
   } else {
@@ -499,6 +507,7 @@ function openProductModal(idx = null) {
     });
     document.getElementById('p-category').value = 'sweets';
     document.getElementById('p-purchase-type').value = 'online';
+    document.getElementById('p-published').checked = true;
     document.getElementById('p-featured').checked = false;
   }
   document.getElementById('p-images-input').value = '';
@@ -542,6 +551,7 @@ async function saveProduct() {
     purchaseType: document.getElementById('p-purchase-type').value,
     images: imgs,
     emoji: document.getElementById('p-emoji').value.trim() || '🍽',
+    published: document.getElementById('p-published').checked,
     featured: document.getElementById('p-featured').checked,
   };
 

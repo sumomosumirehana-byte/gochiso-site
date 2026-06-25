@@ -153,7 +153,7 @@ function renderCard(p, compact = false) {
   if (!container) return;
 
   loadProducts().then(products => {
-    const featured = products.filter(p => p.featured).slice(0, 9);
+    const featured = products.filter(p => p.published !== false && p.featured).slice(0, 9);
     container.innerHTML = featured.map(p => renderCard(p, true)).join('');
   }).catch(() => {
     container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">商品データを読み込めませんでした</p>';
@@ -169,9 +169,10 @@ function renderCard(p, compact = false) {
   let allProducts = [];
 
   function render(filter) {
+    const visible = allProducts.filter(p => p.published !== false);
     const items = filter === 'all'
-      ? allProducts
-      : allProducts.filter(p => p.category === filter);
+      ? visible
+      : visible.filter(p => p.category === filter);
     container.innerHTML = items.length
       ? items.map(p => renderCard(p, false)).join('')
       : '<p style="color:var(--text-muted);text-align:center;">該当する商品がありません</p>';
@@ -203,7 +204,7 @@ function renderCard(p, compact = false) {
 
   loadProducts().then(products => {
     const p = products.find(x => x.id === id);
-    if (!p) { detail.innerHTML = '<p style="text-align:center;color:var(--text-muted);">商品が見つかりませんでした。</p>'; return; }
+    if (!p || p.published === false) { detail.innerHTML = '<p style="text-align:center;color:var(--text-muted);">商品が見つかりませんでした。</p>'; return; }
 
     // Update page title and hero
     document.title = `${p.title}｜ごちそうスタイル`;
