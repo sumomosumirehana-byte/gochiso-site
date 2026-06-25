@@ -61,11 +61,11 @@ function renderCard(p, compact = false) {
   const tagLabel   = p.category === 'sweets' ? 'スイーツ' : 'お食事';
   const detailUrl  = `./product.html?id=${p.id}`;
 
-  // サムネイル: images[0] → YouTubeサムネイル → emoji の優先順
-  const imgSrc = (p.images && p.images.length > 0) ? p.images[0] : getYtThumb(p.youtube);
+  // サムネイル: images[0] → emoji（商品画像が追加されたら自動切替）
+  const imgSrc = (p.images && p.images.length > 0) ? p.images[0] : '';
   const thumbInner = imgSrc
     ? `<img src="${imgSrc}" alt="${p.title}" loading="lazy">`
-    : p.emoji;
+    : `<span class="product-emoji">${p.emoji}</span>`;
 
   if (compact) {
     return `
@@ -118,7 +118,7 @@ function renderCard(p, compact = false) {
   if (!container) return;
 
   loadProducts().then(products => {
-    const featured = products.filter(p => p.featured).slice(0, 3);
+    const featured = products.filter(p => p.featured).slice(0, 9);
     container.innerHTML = featured.map(p => renderCard(p, true)).join('');
   }).catch(() => {
     container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">商品データを読み込めませんでした</p>';
