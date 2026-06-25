@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>商品詳細｜ごちそうスタイル</title>
+  <title>記事詳細｜ごちそうスタイル</title>
   <meta name="description" content="">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
@@ -41,42 +41,30 @@
 </header>
 
 <!-- ===== Page Hero (JS で書き換え) ===== -->
-<div class="page-hero" id="product-hero">
+<div class="page-hero" id="article-hero">
   <div class="breadcrumb">
     <a href="index.html">ホーム</a>
     <span>›</span>
-    <a href="products.html">お取り寄せ</a>
+    <a href="articles.html">おすすめ記事</a>
     <span>›</span>
-    <span id="hero-title">読み込み中...</span>
+    <span id="article-hero-title">読み込み中...</span>
   </div>
-  <h1 id="hero-h1">読み込み中...</h1>
+  <h1 id="article-hero-h1">読み込み中...</h1>
 </div>
 
-<!-- ===== Product Detail (JS で描画) ===== -->
+<!-- ===== Article Detail (JS で描画) ===== -->
 <section class="section">
-  <div class="container">
-    <div id="product-detail">
+  <div class="container" style="max-width: 780px;">
+    <div id="article-detail">
       <p style="color:var(--text-muted);text-align:center;">読み込み中...</p>
     </div>
   </div>
 </section>
 
-<!-- ===== Back to List ===== -->
+<!-- ===== Back ===== -->
 <div style="text-align:center;padding:0 var(--px) 4rem;">
-  <a href="products.html" class="btn btn-outline">← お取り寄せ一覧に戻る</a>
+  <a href="articles.html" class="btn btn-outline">← 記事一覧に戻る</a>
 </div>
-
-<!-- ===== CTA ===== -->
-<section class="cta-banner">
-  <div class="container">
-    <span class="section-label">FOR BRANDS</span>
-    <h2>商品を紹介してほしい方へ</h2>
-    <p>ごちそうスタイルで商品を紹介しませんか。<br>お気軽にご相談ください。</p>
-    <div class="btn-group">
-      <a href="request-feature.html" class="btn btn-primary">商品掲載のご依頼はこちら</a>
-    </div>
-  </div>
-</section>
 
 <!-- ===== Footer ===== -->
 <footer class="site-footer">

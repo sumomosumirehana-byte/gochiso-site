@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理画面｜ごちそうスタイル</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#333;font-size:14px}
+    a{text-decoration:none;color:inherit}
+
+    /* Layout */
+    .wrap{display:flex;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{width:220px;background:#1a1a2e;color:#fff;flex-shrink:0;display:flex;flex-direction:column}
+    .sidebar-logo{padding:1.25rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .sidebar-logo strong{display:block;font-size:0.95rem}
+    .sidebar-logo span{font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.2rem;display:block}
+    .sidebar-nav{flex:1;padding:0.75rem 0}
+    .nav-item{display:flex;align-items:center;gap:0.6rem;padding:0.7rem 1.25rem;color:rgba(255,255,255,0.65);cursor:pointer;font-size:0.875rem;transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
+    .nav-item:hover,.nav-item.active{background:rgba(255,255,255,0.1);color:#fff}
+    .nav-icon{width:18px;text-align:center;font-size:1rem}
+    .sidebar-bottom{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.1)}
+    .conn-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:4px;font-size:0.72rem;font-weight:600}
+    .conn-ok{background:#dcfce7;color:#166534}
+    .conn-ng{background:#fee2e2;color:#dc2626}
+
+    /* Main */
+    .main{flex:1;display:flex;flex-direction:column;min-width:0}
+    .topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .topbar h1{font-size:1rem;font-weight:600}
+    .content{flex:1;padding:1.5rem;overflow-y:auto}
+
+    /* Connect screen */
+    .connect-screen{max-width:440px;margin:5rem auto;text-align:center}
+    .connect-screen .icon{font-size:3.5rem;margin-bottom:1rem}
+    .connect-screen h2{font-size:1.2rem;margin-bottom:0.75rem}
+    .connect-screen p{font-size:0.875rem;color:#6b7280;line-height:1.7;margin-bottom:1.75rem}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1.1rem;border-radius:6px;font-size:0.875rem;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+    .btn-primary{background:#FF9999;color:#fff}
+    .btn-primary:hover{background:#E07777}
+    .btn-outline{background:#fff;border:1px solid #d1d5db;color:#374151}
+    .btn-outline:hover{background:#f9fafb}
+    .btn-danger{background:#fee2e2;color:#dc2626;border:none}
+    .btn-danger:hover{background:#fecaca}
+    .btn-sm{padding:0.3rem 0.7rem;font-size:0.8rem}
+    .btn-lg{padding:0.85rem 2rem;font-size:1rem}
+
+    /* Section */
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+    .sec-header h2{font-size:1rem;font-weight:600}
+
+    /* Table */
+    .tbl{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+    .tbl th{background:#f9fafb;padding:0.65rem 1rem;font-size:0.78rem;font-weight:600;color:#6b7280;text-align:left;border-bottom:1px solid #e5e7eb}
+    .tbl td{padding:0.7rem 1rem;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+    .tbl tr:last-child td{border-bottom:none}
+    .tbl tr:hover td{background:#fafafa}
+    .tbl-actions{display:flex;gap:0.35rem}
+    .trunc{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* Badge */
+    .badge{display:inline-block;padding:0.18rem 0.55rem;border-radius:4px;font-size:0.72rem;font-weight:600}
+    .b-sweets{background:#fce7f3;color:#be185d}
+    .b-meal{background:#fef3c7;color:#92400e}
+    .b-recommend{background:#dbeafe;color:#1e40af}
+    .b-news{background:#f0fdf4;color:#166534}
+    .b-event{background:#faf5ff;color:#6b21a8}
+    .b-yes{background:#dcfce7;color:#166534}
+
+    /* Modal */
+    .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;overflow-y:auto;padding:2rem 1rem}
+    .backdrop.open{display:block}
+    .modal{background:#fff;border-radius:10px;max-width:700px;margin:0 auto;padding:1.75rem}
+    .modal-title{font-size:1.05rem;font-weight:600;margin-bottom:1.5rem}
+    .modal-footer{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #e5e7eb}
+
+    /* Form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .full{grid-column:1/-1}
+    .fg{margin-bottom:0}
+    label{display:block;font-size:0.78rem;font-weight:600;color:#374151;margin-bottom:0.3rem}
+    label .hint{font-weight:400;color:#9ca3af;margin-left:0.3rem}
+    input[type=text],input[type=number],input[type=url],input[type=date],select,textarea{width:100%;padding:0.5rem 0.7rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem;color:#111;background:#fff}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#FF9999;box-shadow:0 0 0 3px rgba(255,153,153,0.15)}
+    textarea{resize:vertical}
+    .cb-row{display:flex;align-items:center;gap:0.5rem}
+    .cb-row input{width:16px;height:16px;cursor:pointer;flex-shrink:0}
+    .cb-row label{margin:0;font-weight:400;cursor:pointer;font-size:0.875rem}
+    .emoji-input{max-width:70px}
+
+    /* Image preview */
+    .img-list{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
+    .img-item{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0}
+    .img-item img{width:100%;height:100%;object-fit:cover;display:block}
+    .img-remove{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:3px;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+    .img-add-label{display:flex;align-items:center;justify-content:center;width:80px;height:80px;border:2px dashed #d1d5db;border-radius:6px;cursor:pointer;color:#9ca3af;font-size:1.5rem;flex-shrink:0;transition:border-color 0.15s}
+    .img-add-label:hover{border-color:#FF9999;color:#FF9999}
+
+    /* Toast */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a1a2e;color:#fff;padding:0.7rem 1.1rem;border-radius:8px;font-size:0.875rem;z-index:999;opacity:0;transform:translateY(8px);transition:all 0.22s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.ok{background:#166534}
+    .toast.err{background:#dc2626}
+
+    /* Empty */
+    .empty{text-align:center;padding:3rem;color:#9ca3af}
+
+    /* Existing images label */
+    .imgs-label{font-size:0.75rem;color:#6b7280;margin-bottom:0.3rem;margin-top:0.75rem}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <strong>ごちそうスタイル</strong>
+      <span>管理画面</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" onclick="connectDir()">
+        <span class="nav-icon">📁</span> フォルダ接続
+      </button>
+      <button class="nav-item" id="tab-products" onclick="showTab('products')">
+        <span class="nav-icon">🛍</span> 商品管理
+      </button>
+      <button class="nav-item" id="tab-articles" onclick="showTab('articles')">
+        <span class="nav-icon">📝</span> 記事管理
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div id="conn-status"><span class="conn-badge conn-ng">未接続</span></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="page-title">管理画面</h1>
+      <a href="../index.html" class="btn btn-outline btn-sm" target="_blank">サイトを見る →</a>
+    </div>
+    <div class="content">
+
+      <!-- Connect screen -->
+      <div id="screen-connect" class="connect-screen">
+        <div class="icon">📁</div>
+        <h2>フォルダを接続してください</h2>
+        <p>「gochiso-site」フォルダを選択すると<br>商品・記事をここから直接編集・保存できます。</p>
+        <button class="btn btn-primary btn-lg" onclick="connectDir()">フォルダを選択</button>
+      </div>
+
+      <!-- Products -->
+      <div id="screen-products" style="display:none">
+        <div class="sec-header">
+          <h2>商品一覧 <span id="products-count" style="font-weight:400;color:#9ca3af;font-size:0.85rem;"></span></h2>
+          <button class="btn btn-primary" onclick="openProductModal()">＋ 商品を追加</button>
+        </div>
+        <table class="tbl">
+          <thead><tr>
+            <th>商品名</th><th>カテゴリ</th><th>価格</th><th>おすすめ</th><th>操作</th>
+          </tr></thead>
+          <tbody id="products-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Articles -->
+      <div id="screen-articles" style="display:none">
+        <div class="sec-header">
+          <h2>記事一覧 <span id="articles-count" style="font-weight:400;color:#9ca3af;font-size:0.85rem;"></span></h2>
+          <button class="btn btn-primary" onclick="openArticleModal()">＋ 記事を追加</button>
+        </div>
+        <table class="tbl">
+          <thead><tr>
+            <th>タイトル</th><th>カテゴリ</th><th>日付</th><th>おすすめ</th><th>操作</th>
+          </tr></thead>
+          <tbody id="articles-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== Product Modal ===== -->
+<div class="backdrop" id="modal-product" onclick="backdropClose(event,'modal-product')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="product-modal-title">商品を追加</div>
+  <div class="form-grid">
+    <div class="fg full">
+      <label>商品名 <span style="color:#ef4444">*</span></label>
+      <input type="text" id="p-title" placeholder="例：大注目のマヌカハニー">
+    </div>
+    <div class="fg full">
+      <label>説明文</label>
+      <textarea id="p-description" rows="3" placeholder="商品の特徴・説明"></textarea>
+    </div>
+    <div class="fg full">
+      <label>販売員コメント<span class="hint">催事での印象など</span></label>
+      <textarea id="p-comment" rows="2" placeholder="「〜というお声が多いです！」など"></textarea>
+    </div>
+    <div class="fg">
+      <label>販売主・メーカー名</label>
+      <input type="text" id="p-manufacturer" placeholder="例：株式会社〇〇">
+    </div>
+    <div class="fg">
+      <label>カテゴリ</label>
+      <select id="p-category">
+        <option value="sweets">スイーツ</option>
+        <option value="meal">お食事</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>価格<span class="hint">税込・送料込（数字のみ）</span></label>
+      <input type="number" id="p-price" placeholder="例：3000" min="0">
+    </div>
+    <div class="fg">
+      <label>絵文字<span class="hint">画像なし時に表示</span></label>
+      <input type="text" id="p-emoji" placeholder="🍯" class="emoji-input">
+    </div>
+    <div class="fg full">
+      <label>YouTube URL</label>
+      <input type="url" id="p-youtube" placeholder="https://youtu.be/xxxxx">
+    </div>
+    <div class="fg">
+      <label>購入リンク URL</label>
+      <input type="url" id="p-purchase-url" placeholder="https://...">
+    </div>
+    <div class="fg">
+      <label>購入タイプ</label>
+      <select id="p-purchase-type">
+        <option value="online">オンライン購入</option>
+        <option value="store">店舗情報</option>
+      </select>
+    </div>
+    <div class="fg full">
+      <label>商品画像<span class="hint">複数枚可。images/products/ に保存されます</span></label>
+      <input type="file" id="p-images-input" accept="image/*" multiple style="display:none" onchange="onProductImages(this)">
+      <div class="img-list" id="p-img-list">
+        <label class="img-add-label" for="p-images-input" title="画像を追加">＋</label>
+      </div>
+    </div>
+    <div class="fg full">
+      <div class="cb-row">
+        <input type="checkbox" id="p-featured">
+        <label for="p-featured">おすすめ商品（TOPページに表示）</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('modal-product')">キャンセル</button>
+    <button class="btn btn-primary" onclick="saveProduct()">保存する</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== Article Modal ===== -->
+<div class="backdrop" id="modal-article" onclick="backdropClose(event,'modal-article')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="article-modal-title">記事を追加</div>
+  <div class="form-grid">
+    <div class="fg full">
+      <label>タイトル <span style="color:#ef4444">*</span></label>
+      <input type="text" id="a-title" placeholder="例：催事で大人気！おすすめスイーツ5選">
+    </div>
+    <div class="fg full">
+      <label>リード文<span class="hint">記事一覧に表示される要約（2〜3文）</span></label>
+      <textarea id="a-excerpt" rows="2" placeholder="記事の要約を入力"></textarea>
+    </div>
+    <div class="fg full">
+      <label>本文<span class="hint">HTMLタグ使用可（&lt;p&gt; &lt;h2&gt; &lt;ul&gt; &lt;img src="..."&gt; など）</span></label>
+      <textarea id="a-content" rows="12" placeholder="<p>本文を入力してください。</p>"></textarea>
+    </div>
+    <div class="fg">
+      <label>カテゴリ</label>
+      <select id="a-category">
+        <option value="recommend">おすすめ</option>
+        <option value="news">お知らせ</option>
+        <option value="event">催事情報</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>公開日</label>
+      <input type="date" id="a-date">
+    </div>
+    <div class="fg">
+      <label>絵文字</label>
+      <input type="text" id="a-emoji" placeholder="📝" class="emoji-input">
+    </div>
+    <div class="fg">
+      <label>タグ<span class="hint">カンマ区切り</span></label>
+      <input type="text" id="a-tags" placeholder="スイーツ, 催事">
+    </div>
+    <div class="fg full">
+      <label>サムネイル画像<span class="hint">images/articles/ に保存されます</span></label>
+      <input type="file" id="a-thumb-input" accept="image/*" style="display:none" onchange="onArticleThumb(this)">
+      <div class="img-list" id="a-img-list">
+        <label class="img-add-label" for="a-thumb-input" title="画像を追加">＋</label>
+      </div>
+    </div>
+    <div class="fg full">
+      <div class="cb-row">
+        <input type="checkbox" id="a-featured">
+        <label for="a-featured">おすすめ（TOPページに表示）</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('modal-article')">キャンセル</button>
+    <button class="btn btn-primary" onclick="saveArticle()">保存する</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== State ===== */
+let root = null;
+let products = [];
+let articles = [];
+let editPIdx = null;   // product editing index
+let editAIdx = null;   // article editing index
+let pNewImages = [];   // File[] — new images to upload
+let pExistImages = []; // string[] — already stored paths
+let aNewThumb = null;  // File | null
+let aExistThumb = '';  // string
+
+/* ===== IndexedDB handle persistence ===== */
+function dbPromise() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('gs-admin', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('h');
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = () => rej();
+  });
+}
+async function saveHandle(h) {
+  try { const db = await dbPromise(); const tx = db.transaction('h','readwrite'); tx.objectStore('h').put(h,'root'); } catch{}
+}
+async function loadHandle() {
+  try {
+    const db = await dbPromise();
+    return new Promise(res => {
+      const req = db.transaction('h','readonly').objectStore('h').get('root');
+      req.onsuccess = async () => {
+        const h = req.result;
+        if (!h) return res(null);
+        try {
+          let perm = await h.queryPermission({mode:'readwrite'});
+          if (perm !== 'granted') perm = await h.requestPermission({mode:'readwrite'});
+          res(perm === 'granted' ? h : null);
+        } catch { res(null); }
+      };
+      req.onerror = () => res(null);
+    });
+  } catch { return null; }
+}
+
+/* ===== File System ===== */
+async function connectDir() {
+  try {
+    root = await window.showDirectoryPicker({mode:'readwrite'});
+    await saveHandle(root);
+    updateConnStatus();
+    await loadAll();
+    showTab('products');
+    toast('接続しました：' + root.name, 'ok');
+  } catch(e) {
+    if (e.name !== 'AbortError') toast('接続に失敗しました', 'err');
+  }
+}
+
+async function getFile(path) {
+  const parts = path.split('/');
+  let dir = root;
+  for (let i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i]);
+  return (await dir.getFileHandle(parts[parts.length-1])).getFile();
+}
+
+async function writeFile(path, content) {
+  const parts = path.split('/');
+  let dir = root;
+  for (let i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i], {create:true});
+  const fh = await dir.getFileHandle(parts[parts.length-1], {create:true});
+  const w = await fh.createWritable();
+  await w.write(content);
+  await w.close();
+}
+
+async function copyImg(file, subdir) {
+  const parts = subdir.split('/');
+  let dir = root;
+  for (const p of parts) dir = await dir.getDirectoryHandle(p, {create:true});
+  const fh = await dir.getFileHandle(file.name, {create:true});
+  const w = await fh.createWritable();
+  await w.write(await file.arrayBuffer());
+  await w.close();
+  return subdir + '/' + file.name;
+}
+
+async function readJson(path) {
+  try { const f = await getFile(path); return JSON.parse(await f.text()); }
+  catch { return null; }
+}
+
+async function writeJson(path, data) {
+  await writeFile(path, JSON.stringify(data, null, 2));
+}
+
+/* ===== Init ===== */
+async function init() {
+  const h = await loadHandle();
+  if (h) { root = h; updateConnStatus(); await loadAll(); showTab('products'); }
+}
+
+async function loadAll() {
+  products = (await readJson('data/products.json')) || [];
+  articles = (await readJson('data/articles.json')) || [];
+}
+
+function updateConnStatus() {
+  document.getElementById('conn-status').innerHTML = root
+    ? `<span class="conn-badge conn-ok">● ${root.name}</span>`
+    : '<span class="conn-badge conn-ng">未接続</span>';
+}
+
+/* ===== Tabs ===== */
+function showTab(tab) {
+  if (!root) { toast('フォルダを先に接続してください', 'err'); return; }
+  ['connect','products','articles'].forEach(s => {
+    document.getElementById('screen-' + s).style.display = 'none';
+  });
+  document.getElementById('screen-' + tab).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('page-title').textContent = tab === 'products' ? '商品管理' : '記事管理';
+  if (tab === 'products') renderProducts();
+  if (tab === 'articles') renderArticles();
+}
+
+/* ===== Products ===== */
+function renderProducts() {
+  document.getElementById('products-count').textContent = `（${products.length}件）`;
+  const tb = document.getElementById('products-body');
+  if (!products.length) {
+    tb.innerHTML = '<tr><td colspan="5"><div class="empty">商品がまだありません。</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = products.map((p, i) => `
+    <tr>
+      <td><div class="trunc">${p.emoji||''} ${p.title}</div></td>
+      <td><span class="badge ${p.category==='sweets'?'b-sweets':'b-meal'}">${p.category==='sweets'?'スイーツ':'お食事'}</span></td>
+      <td>${p.price ? '¥'+p.price.toLocaleString() : '—'}</td>
+      <td>${p.featured?'<span class="badge b-yes">★</span>':''}</td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-outline btn-sm" onclick="editProduct(${i})">編集</button>
+        <button class="btn btn-danger btn-sm" onclick="delProduct(${i})">削除</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openProductModal(idx = null) {
+  editPIdx = idx;
+  pNewImages = [];
+  pExistImages = [];
+  const isEdit = idx !== null;
+  document.getElementById('product-modal-title').textContent = isEdit ? '商品を編集' : '商品を追加';
+
+  if (isEdit) {
+    const p = products[idx];
+    document.getElementById('p-title').value = p.title || '';
+    document.getElementById('p-description').value = p.description || '';
+    document.getElementById('p-comment').value = p.comment || '';
+    document.getElementById('p-manufacturer').value = p.manufacturer || '';
+    document.getElementById('p-category').value = p.category || 'sweets';
+    document.getElementById('p-price').value = p.price || '';
+    document.getElementById('p-emoji').value = p.emoji || '';
+    document.getElementById('p-youtube').value = p.youtube || '';
+    document.getElementById('p-purchase-url').value = p.purchaseUrl || '';
+    document.getElementById('p-purchase-type').value = p.purchaseType || 'online';
+    document.getElementById('p-featured').checked = !!p.featured;
+    pExistImages = Array.isArray(p.images) ? [...p.images] : [];
+  } else {
+    ['p-title','p-description','p-comment','p-manufacturer','p-price','p-emoji','p-youtube','p-purchase-url'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('p-category').value = 'sweets';
+    document.getElementById('p-purchase-type').value = 'online';
+    document.getElementById('p-featured').checked = false;
+  }
+  document.getElementById('p-images-input').value = '';
+  renderProductImgList();
+  document.getElementById('modal-product').classList.add('open');
+}
+
+function editProduct(i) { openProductModal(i); }
+
+async function delProduct(i) {
+  if (!confirm(`「${products[i].title}」を削除しますか？`)) return;
+  products.splice(i, 1);
+  await writeJson('data/products.json', products);
+  renderProducts();
+  toast('削除しました', 'ok');
+}
+
+async function saveProduct() {
+  const title = document.getElementById('p-title').value.trim();
+  if (!title) { toast('商品名を入力してください', 'err'); return; }
+
+  // Upload new images
+  const imgs = [...pExistImages];
+  for (const f of pNewImages) {
+    try { imgs.push(await copyImg(f, 'images/products')); }
+    catch { toast('画像の保存に失敗: ' + f.name, 'err'); return; }
+  }
+
+  const price = parseInt(document.getElementById('p-price').value) || 0;
+  const data = {
+    id: editPIdx !== null ? products[editPIdx].id : 'product-' + Date.now(),
+    title,
+    description: document.getElementById('p-description').value.trim(),
+    comment: document.getElementById('p-comment').value.trim(),
+    manufacturer: document.getElementById('p-manufacturer').value.trim(),
+    price,
+    priceNote: price === 0 ? '価格・購入リンクを更新してください' : '',
+    category: document.getElementById('p-category').value,
+    youtube: document.getElementById('p-youtube').value.trim(),
+    purchaseUrl: document.getElementById('p-purchase-url').value.trim(),
+    purchaseType: document.getElementById('p-purchase-type').value,
+    images: imgs,
+    emoji: document.getElementById('p-emoji').value.trim() || '🍽',
+    featured: document.getElementById('p-featured').checked,
+  };
+
+  if (editPIdx !== null) products[editPIdx] = data;
+  else products.push(data);
+
+  await writeJson('data/products.json', products);
+  closeModal('modal-product');
+  renderProducts();
+  toast('保存しました', 'ok');
+}
+
+function renderProductImgList() {
+  const list = document.getElementById('p-img-list');
+  const addBtn = `<label class="img-add-label" for="p-images-input" title="画像を追加">＋</label>`;
+  const existHtml = pExistImages.map((src, i) =>
+    `<div class="img-item"><img src="../${src}" onerror="this.parentNode.style.background='#f3f4f6'">
+    <button class="img-remove" onclick="removeExistImg(${i})">✕</button></div>`).join('');
+  const newHtml = pNewImages.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="img-item"><img src="${url}"><button class="img-remove" onclick="removeNewImg(${i})">✕</button></div>`;
+  }).join('');
+  list.innerHTML = existHtml + newHtml + addBtn;
+}
+
+function onProductImages(input) {
+  pNewImages.push(...Array.from(input.files));
+  input.value = '';
+  renderProductImgList();
+}
+
+function removeExistImg(i) { pExistImages.splice(i, 1); renderProductImgList(); }
+function removeNewImg(i)   { pNewImages.splice(i, 1);   renderProductImgList(); }
+
+/* ===== Articles ===== */
+const CAT_LABEL = {recommend:'おすすめ', news:'お知らせ', event:'催事情報'};
+const CAT_CLS   = {recommend:'b-recommend', news:'b-news', event:'b-event'};
+
+function renderArticles() {
+  document.getElementById('articles-count').textContent = `（${articles.length}件）`;
+  const tb = document.getElementById('articles-body');
+  if (!articles.length) {
+    tb.innerHTML = '<tr><td colspan="5"><div class="empty">記事がまだありません。</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = articles.map((a, i) => `
+    <tr>
+      <td><div class="trunc">${a.emoji||''} ${a.title}</div></td>
+      <td><span class="badge ${CAT_CLS[a.category]||'b-recommend'}">${CAT_LABEL[a.category]||a.category}</span></td>
+      <td>${a.date||'—'}</td>
+      <td>${a.featured?'<span class="badge b-yes">★</span>':''}</td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-outline btn-sm" onclick="editArticle(${i})">編集</button>
+        <button class="btn btn-danger btn-sm" onclick="delArticle(${i})">削除</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openArticleModal(idx = null) {
+  editAIdx = idx;
+  aNewThumb = null;
+  aExistThumb = '';
+  const isEdit = idx !== null;
+  document.getElementById('article-modal-title').textContent = isEdit ? '記事を編集' : '記事を追加';
+  const today = new Date().toISOString().split('T')[0];
+
+  if (isEdit) {
+    const a = articles[idx];
+    document.getElementById('a-title').value   = a.title   || '';
+    document.getElementById('a-excerpt').value = a.excerpt || '';
+    document.getElementById('a-content').value = a.content || '';
+    document.getElementById('a-category').value = a.category || 'recommend';
+    document.getElementById('a-date').value    = a.date    || today;
+    document.getElementById('a-emoji').value   = a.emoji   || '';
+    document.getElementById('a-tags').value    = Array.isArray(a.tags) ? a.tags.join(', ') : '';
+    document.getElementById('a-featured').checked = !!a.featured;
+    aExistThumb = a.thumbnail || '';
+  } else {
+    ['a-title','a-excerpt','a-content','a-emoji','a-tags'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('a-category').value = 'recommend';
+    document.getElementById('a-date').value = today;
+    document.getElementById('a-featured').checked = false;
+  }
+  document.getElementById('a-thumb-input').value = '';
+  renderArticleThumbList();
+  document.getElementById('modal-article').classList.add('open');
+}
+
+function editArticle(i) { openArticleModal(i); }
+
+async function delArticle(i) {
+  if (!confirm(`「${articles[i].title}」を削除しますか？`)) return;
+  articles.splice(i, 1);
+  await writeJson('data/articles.json', articles);
+  renderArticles();
+  toast('削除しました', 'ok');
+}
+
+async function saveArticle() {
+  const title = document.getElementById('a-title').value.trim();
+  if (!title) { toast('タイトルを入力してください', 'err'); return; }
+
+  let thumb = aExistThumb;
+  if (aNewThumb) {
+    try { thumb = await copyImg(aNewThumb, 'images/articles'); }
+    catch { toast('画像の保存に失敗しました', 'err'); return; }
+  }
+
+  const tags = document.getElementById('a-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const data = {
+    id: editAIdx !== null ? articles[editAIdx].id : 'article-' + Date.now(),
+    title,
+    excerpt: document.getElementById('a-excerpt').value.trim(),
+    content: document.getElementById('a-content').value,
+    category: document.getElementById('a-category').value,
+    thumbnail: thumb,
+    emoji: document.getElementById('a-emoji').value.trim() || '📝',
+    date: document.getElementById('a-date').value,
+    featured: document.getElementById('a-featured').checked,
+    tags,
+  };
+
+  if (editAIdx !== null) articles[editAIdx] = data;
+  else articles.push(data);
+
+  await writeJson('data/articles.json', articles);
+  closeModal('modal-article');
+  renderArticles();
+  toast('保存しました', 'ok');
+}
+
+function renderArticleThumbList() {
+  const list = document.getElementById('a-img-list');
+  const addBtn = `<label class="img-add-label" for="a-thumb-input" title="画像を選択">＋</label>`;
+  if (aNewThumb) {
+    const url = URL.createObjectURL(aNewThumb);
+    list.innerHTML = `<div class="img-item"><img src="${url}"><button class="img-remove" onclick="removeNewThumb()">✕</button></div>`;
+  } else if (aExistThumb) {
+    list.innerHTML = `<div class="img-item"><img src="../${aExistThumb}" onerror="this.parentNode.style.background='#f3f4f6'">
+      <button class="img-remove" onclick="removeExistThumb()">✕</button></div>`;
+  } else {
+    list.innerHTML = addBtn;
+  }
+}
+
+function onArticleThumb(input) {
+  aNewThumb = input.files[0] || null;
+  input.value = '';
+  renderArticleThumbList();
+}
+
+function removeExistThumb() { aExistThumb = ''; renderArticleThumbList(); }
+function removeNewThumb()   { aNewThumb = null;   renderArticleThumbList(); }
+
+/* ===== Modal ===== */
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function backdropClose(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+
+/* ===== Toast ===== */
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>

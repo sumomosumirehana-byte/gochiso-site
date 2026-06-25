@@ -43,9 +43,44 @@ async function loadProducts() {
   return res.json();
 }
 
+async function loadArticles() {
+  const res = await fetch('./data/articles.json');
+  if (!res.ok) return [];
+  return res.json();
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${y}.${m}.${day}`;
+}
+
+function renderArticleCard(a, compact = false) {
+  const catLabel = { recommend: 'おすすめ', news: 'お知らせ', event: '催事情報' };
+  const catClass = { recommend: 'tag-sweets', news: 'tag-meal', event: 'tag-sweets' };
+  const detailUrl = `./article.html?id=${a.id}`;
+
+  const thumbInner = (a.thumbnail && a.thumbnail !== '')
+    ? `<img src="${a.thumbnail}" alt="${a.title}" loading="lazy">`
+    : `<span class="product-emoji">${a.emoji || '📝'}</span>`;
+
+  return `
+    <a href="${detailUrl}" class="article-card">
+      <div class="article-thumb">${thumbInner}</div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="article-date">${formatDate(a.date)}</span>
+          <span class="tag ${catClass[a.category] || 'tag-sweets'}">${catLabel[a.category] || a.category}</span>
+        </div>
+        <h3>${a.title}</h3>
+        ${compact ? '' : `<p class="article-excerpt">${a.excerpt || ''}</p>`}
+      </div>
+    </a>`;
+}
+
 function formatPrice(p) {
-  if (!p.price || p.price === 0) return p.priceNote || '価格未設定';
-  return `¥${p.price.toLocaleString()}（税込）`;
+  if (!p.price || p.price === 0) return p.priceNote || '価格・購入リンクを更新してください';
+  return `¥${p.price.toLocaleString()}（税込・送料込）`;
 }
 
 // YouTube URL から動画IDを抽出してサムネイルURLを生成
@@ -214,9 +249,6 @@ function renderCard(p, compact = false) {
     const purchaseBtn = p.purchaseUrl
       ? `<a href="${p.purchaseUrl}" target="_blank" rel="noopener" class="btn btn-primary">${p.purchaseType === 'store' ? '店舗情報を見る →' : '購入する →'}</a>`
       : '';
-    const officialBtn = p.officialUrl
-      ? `<a href="${p.officialUrl}" target="_blank" rel="noopener" class="btn btn-outline">公式サイトを見る →</a>`
-      : '';
 
     detail.innerHTML = `
       <div class="product-detail-grid">
@@ -231,10 +263,9 @@ function renderCard(p, compact = false) {
           <div class="product-detail-comment">${p.comment}</div>
           <div class="product-detail-meta">
             <div class="product-detail-meta-row">
-              <span class="product-detail-meta-label">金額</span>
+              <span class="product-detail-meta-label">価格</span>
               <span class="product-detail-price-value">${formatPrice(p)}</span>
             </div>
-            <p class="product-price-note">※送料等を含む正確な金額は各購入ページでご確認ください</p>
             <div class="product-detail-meta-row">
               <span class="product-detail-meta-label">販売主</span>
               <span>${p.manufacturer}</span>
@@ -242,7 +273,6 @@ function renderCard(p, compact = false) {
           </div>
           <div class="product-detail-actions">
             ${purchaseBtn}
-            ${officialBtn}
           </div>
         </div>
       </div>`;
@@ -261,6 +291,94 @@ window.setMainImage = function (thumb, src) {
   document.querySelectorAll('.product-gallery-thumb').forEach(t => t.classList.remove('active'));
   thumb.classList.add('active');
 };
+
+// Top page: featured articles
+(function () {
+  const container = document.getElementById('featured-articles');
+  if (!container) return;
+  const section  = document.getElementById('articles-section');
+
+  loadArticles().then(articles => {
+    const featured = articles.filter(a => a.featured).slice(0, 3);
+    if (!featured.length) {
+      if (section) section.style.display = 'none';
+      return;
+    }
+    container.innerHTML = featured.map(a => renderArticleCard(a, true)).join('');
+  }).catch(() => {
+    if (section) section.style.display = 'none';
+  });
+})();
+
+// Articles page: all articles
+(function () {
+  const container = document.getElementById('all-articles');
+  const tabs      = document.querySelectorAll('.article-filter-tab');
+  if (!container) return;
+
+  let allArticles = [];
+
+  function renderList(filter) {
+    const items = filter === 'all' ? allArticles : allArticles.filter(a => a.category === filter);
+    container.innerHTML = items.length
+      ? items.map(a => renderArticleCard(a, false)).join('')
+      : '<p style="color:var(--text-muted);text-align:center;">該当する記事がありません</p>';
+  }
+
+  loadArticles().then(articles => {
+    allArticles = articles;
+    renderList('all');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderList(tab.dataset.filter);
+      });
+    });
+  }).catch(() => {
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">記事データを読み込めませんでした</p>';
+  });
+})();
+
+// Article detail page
+(function () {
+  const detail = document.getElementById('article-detail');
+  if (!detail) return;
+
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (!id) { detail.innerHTML = '<p style="text-align:center;color:var(--text-muted);">記事が見つかりませんでした。</p>'; return; }
+
+  loadArticles().then(articles => {
+    const a = articles.find(x => x.id === id);
+    if (!a) { detail.innerHTML = '<p style="text-align:center;color:var(--text-muted);">記事が見つかりませんでした。</p>'; return; }
+
+    document.title = `${a.title}｜ごちそうスタイル`;
+    const heroTitle = document.getElementById('article-hero-title');
+    const heroH1    = document.getElementById('article-hero-h1');
+    if (heroTitle) heroTitle.textContent = a.title;
+    if (heroH1)    heroH1.textContent    = a.title;
+
+    const catLabel = { recommend: 'おすすめ', news: 'お知らせ', event: '催事情報' };
+    const catClass = { recommend: 'tag-sweets', news: 'tag-meal', event: 'tag-sweets' };
+    const thumbHtml = (a.thumbnail && a.thumbnail !== '')
+      ? `<img src="${a.thumbnail}" alt="${a.title}" class="article-detail-thumb">`
+      : '';
+
+    detail.innerHTML = `
+      <div class="article-detail-header">
+        <div class="article-meta" style="margin-bottom:1rem;">
+          <span class="article-date">${formatDate(a.date)}</span>
+          <span class="tag ${catClass[a.category] || 'tag-sweets'}">${catLabel[a.category] || a.category}</span>
+        </div>
+        ${thumbHtml}
+        ${a.excerpt ? `<p class="article-lead">${a.excerpt}</p>` : ''}
+      </div>
+      <div class="article-content">${a.content || ''}</div>
+      ${Array.isArray(a.tags) && a.tags.length ? `<div class="article-tags">${a.tags.map(t => `<span class="article-tag">#${t}</span>`).join('')}</div>` : ''}`;
+  }).catch(() => {
+    detail.innerHTML = '<p style="text-align:center;color:var(--text-muted);">記事データを読み込めませんでした。</p>';
+  });
+})();
 
 // Form: sending state
 (function () {

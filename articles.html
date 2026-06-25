@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>商品詳細｜ごちそうスタイル</title>
-  <meta name="description" content="">
+  <title>おすすめ記事｜ごちそうスタイル</title>
+  <meta name="description" content="催事・食品に関するおすすめ記事・コラム・お知らせ。ごちそうスタイルが発信する食の現場からの情報。">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -40,41 +40,32 @@
   </div>
 </header>
 
-<!-- ===== Page Hero (JS で書き換え) ===== -->
-<div class="page-hero" id="product-hero">
+<!-- ===== Page Hero ===== -->
+<div class="page-hero">
   <div class="breadcrumb">
     <a href="index.html">ホーム</a>
     <span>›</span>
-    <a href="products.html">お取り寄せ</a>
-    <span>›</span>
-    <span id="hero-title">読み込み中...</span>
+    <span>おすすめ記事</span>
   </div>
-  <h1 id="hero-h1">読み込み中...</h1>
+  <h1>おすすめ記事</h1>
+  <p>催事・食品に関するコラム、お知らせ、催事情報をお届けします。</p>
 </div>
 
-<!-- ===== Product Detail (JS で描画) ===== -->
+<!-- ===== Articles ===== -->
 <section class="section">
   <div class="container">
-    <div id="product-detail">
-      <p style="color:var(--text-muted);text-align:center;">読み込み中...</p>
-    </div>
-  </div>
-</section>
 
-<!-- ===== Back to List ===== -->
-<div style="text-align:center;padding:0 var(--px) 4rem;">
-  <a href="products.html" class="btn btn-outline">← お取り寄せ一覧に戻る</a>
-</div>
-
-<!-- ===== CTA ===== -->
-<section class="cta-banner">
-  <div class="container">
-    <span class="section-label">FOR BRANDS</span>
-    <h2>商品を紹介してほしい方へ</h2>
-    <p>ごちそうスタイルで商品を紹介しませんか。<br>お気軽にご相談ください。</p>
-    <div class="btn-group">
-      <a href="request-feature.html" class="btn btn-primary">商品掲載のご依頼はこちら</a>
+    <div class="filter-tabs">
+      <button class="article-filter-tab filter-tab active" data-filter="all">すべて</button>
+      <button class="article-filter-tab filter-tab" data-filter="recommend">おすすめ</button>
+      <button class="article-filter-tab filter-tab" data-filter="news">お知らせ</button>
+      <button class="article-filter-tab filter-tab" data-filter="event">催事情報</button>
     </div>
+
+    <div class="articles-grid" id="all-articles">
+      <p style="color:var(--text-muted);font-size:0.9rem;">読み込み中...</p>
+    </div>
+
   </div>
 </section>
 
