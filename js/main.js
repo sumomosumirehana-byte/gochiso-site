@@ -103,9 +103,10 @@ function renderCard(p, compact = false) {
     : `<span class="product-emoji">${p.emoji}</span>`;
 
   if (compact) {
+    const pickupBadge = p.featured ? '<span class="pickup-badge">PICKUP</span>' : '';
     return `
       <a href="${detailUrl}" class="product-card" data-category="${p.category}">
-        <div class="product-thumb ${thumbClass}">${thumbInner}</div>
+        <div class="product-thumb ${thumbClass}" style="position:relative;">${thumbInner}${pickupBadge}</div>
         <div class="product-body">
           <span class="tag ${tagClass}">${tagLabel}</span>
           <h3>${p.title}</h3>

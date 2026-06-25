@@ -1769,6 +1769,22 @@ select {
   .cgh-text h2 { font-size: 1.1rem; }
 }
 
+/* PICKUP badge */
+.pickup-badge {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.55rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  line-height: 1;
+  pointer-events: none;
+}
+
 /* =====================================================
    記事 (articles)
    ===================================================== */
