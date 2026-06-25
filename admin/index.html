@@ -137,6 +137,10 @@
     </nav>
     <div class="sidebar-bottom">
       <div id="conn-status"><span class="conn-badge conn-ng">未接続</span></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:0.75rem;justify-content:center;gap:0.4rem" onclick="publishToGitHub()" id="publish-btn">
+        🚀 GitHubに公開
+      </button>
+      <div id="publish-status" style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.5rem;line-height:1.5"></div>
     </div>
   </aside>
 
@@ -720,6 +724,107 @@ function toast(msg, type='') {
 }
 
 init();
+
+/* ===== GitHub Publish ===== */
+const GH_REPO = 'sumomosumirehana-byte/gochiso-site';
+const GH_API  = 'https://api.github.com';
+
+async function publishToGitHub() {
+  if (!root) { toast('フォルダを先に接続してください', 'err'); return; }
+
+  let token = localStorage.getItem('gh-token');
+  if (!token) {
+    token = prompt('GitHub Personal Access Token を入力してください\n\n取得方法：GitHub → Settings → Developer settings\n→ Personal access tokens → Tokens (classic)\n→ Generate new token → repo にチェック');
+    if (!token) return;
+    localStorage.setItem('gh-token', token.trim());
+    token = token.trim();
+  }
+
+  const btn = document.getElementById('publish-btn');
+  const stat = document.getElementById('publish-status');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 公開中...';
+  stat.textContent = '';
+
+  try {
+    await pushJson('data/products.json', token);
+    stat.textContent = '✓ products.json';
+    await pushJson('data/articles.json', token);
+    stat.textContent = '✓ JSON 完了。画像を確認中...';
+    await pushNewImages(token);
+    stat.innerHTML = '✅ 公開完了！<br>1〜2分で反映されます。';
+    toast('GitHubに公開しました', 'ok');
+  } catch(e) {
+    const msg = e.message || '不明なエラー';
+    stat.textContent = '✗ ' + msg;
+    toast('公開に失敗しました', 'err');
+    if (msg.includes('Bad credentials') || msg.includes('401')) {
+      localStorage.removeItem('gh-token');
+      stat.textContent = '✗ トークンが無効です。もう一度ボタンを押して再入力してください。';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🚀 GitHubに公開';
+  }
+}
+
+async function pushJson(filePath, token) {
+  let text;
+  try { const f = await getFile(filePath); text = await f.text(); }
+  catch { return; }
+
+  const sha = await getGhSha(filePath, token);
+  const body = {
+    message: `管理画面から更新: ${filePath.split('/').pop()}`,
+    content: b64Encode(text),
+  };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(`${GH_API}/repos/${GH_REPO}/contents/${filePath}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || filePath + ' の更新に失敗'); }
+}
+
+async function pushNewImages(token) {
+  for (const dir of ['images/products', 'images/articles']) {
+    let dirHandle;
+    try {
+      let d = root;
+      for (const p of dir.split('/')) d = await d.getDirectoryHandle(p);
+      dirHandle = d;
+    } catch { continue; }
+
+    for await (const [name, handle] of dirHandle.entries()) {
+      if (handle.kind !== 'file' || !name.match(/\.(jpe?g|png|gif|webp|svg)$/i)) continue;
+      const path = dir + '/' + name;
+      const sha = await getGhSha(path, token);
+      if (sha) continue; // 既に存在
+      const file = await handle.getFile();
+      const buf  = await file.arrayBuffer();
+      const b64  = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      await fetch(`${GH_API}/repos/${GH_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `画像を追加: ${name}`, content: b64 }),
+      });
+    }
+  }
+}
+
+async function getGhSha(path, token) {
+  const res = await fetch(`${GH_API}/repos/${GH_REPO}/contents/${path}`, {
+    headers: { 'Authorization': `token ${token}` }
+  });
+  if (!res.ok) return null;
+  return (await res.json()).sha || null;
+}
+
+function b64Encode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
 </script>
 </body>
 </html>
