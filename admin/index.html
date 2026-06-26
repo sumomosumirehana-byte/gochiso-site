@@ -125,14 +125,14 @@
       <span>管理画面</span>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item" onclick="connectDir()">
-        <span class="nav-icon">📁</span> フォルダ接続
-      </button>
       <button class="nav-item" id="tab-products" onclick="showTab('products')">
         <span class="nav-icon">🛍</span> 商品管理
       </button>
       <button class="nav-item" id="tab-articles" onclick="showTab('articles')">
         <span class="nav-icon">📝</span> 記事管理
+      </button>
+      <button class="nav-item" onclick="connectDir()" title="画像ファイルをアップロードする場合に接続">
+        <span class="nav-icon">📁</span> フォルダ接続<span style="font-size:0.65rem;opacity:0.55;margin-left:0.3rem">任意</span>
       </button>
     </nav>
     <div class="sidebar-bottom">
@@ -152,20 +152,10 @@
     </div>
     <div class="content">
 
-      <!-- Connect screen -->
-      <div id="screen-connect" class="connect-screen">
-        <div class="icon">📁</div>
-        <h2>フォルダを接続してください</h2>
-        <p>「フォルダを選択」を押すと、ファイル選択ダイアログが開きます。<br>以下の場所にある <strong>gochiso-site</strong> フォルダを選択してください。</p>
-        <div style="background:#f3f4f6;border-radius:8px;padding:0.9rem 1.1rem;text-align:left;margin-bottom:1.5rem;font-size:0.82rem;line-height:1.9;color:#374151">
-          <div style="margin-bottom:0.4rem;font-weight:600;color:#6b7280;font-size:0.75rem;">場所</div>
-          OneDrive &gt; デスクトップ &gt; <strong style="color:#FF9999">gochiso-site</strong>
-          <div style="margin-top:0.5rem;font-size:0.75rem;color:#9ca3af;">
-            フルパス：C:\Users\tkita\OneDrive\デスクトップ\gochiso-site
-          </div>
-        </div>
-        <button class="btn btn-primary btn-lg" onclick="connectDir()">フォルダを選択</button>
-        <p style="margin-top:1rem;font-size:0.78rem;color:#9ca3af;">※ Chrome または Edge で開いてください（Safari は非対応）</p>
+      <!-- Loading screen -->
+      <div id="screen-loading" style="text-align:center;padding:5rem 2rem;color:#9ca3af">
+        <div style="font-size:2rem;margin-bottom:1rem">⏳</div>
+        <p>データを読み込んでいます...</p>
       </div>
 
       <!-- Products -->
@@ -337,18 +327,24 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ===== Constants ===== */
+const GH_REPO = 'sumomosumirehana-byte/gochiso-site';
+const GH_API  = 'https://api.github.com';
+const GH_RAW  = `https://raw.githubusercontent.com/${GH_REPO}/main`;
+
 /* ===== State ===== */
 let root = null;
 let products = [];
 let articles = [];
-let editPIdx = null;   // product editing index
-let editAIdx = null;   // article editing index
-let pNewImages = [];   // File[] — new images to upload
-let pExistImages = []; // string[] — already stored paths
-let aNewThumb = null;  // File | null
-let aExistThumb = '';  // string
+let editPIdx = null;
+let editAIdx = null;
+let pNewImages = [];
+let pExistImages = [];
+let aNewThumb = null;
+let aExistThumb = '';
+let pendingImages = []; // {file, path}[] — 公開時にGitHubへアップ
 
-/* ===== IndexedDB handle persistence ===== */
+/* ===== IndexedDB (フォルダ再接続用) ===== */
 function dbPromise() {
   return new Promise((res, rej) => {
     const req = indexedDB.open('gs-admin', 1);
@@ -358,7 +354,7 @@ function dbPromise() {
   });
 }
 async function saveHandle(h) {
-  try { const db = await dbPromise(); const tx = db.transaction('h','readwrite'); tx.objectStore('h').put(h,'root'); } catch{}
+  try { const db = await dbPromise(); db.transaction('h','readwrite').objectStore('h').put(h,'root'); } catch{}
 }
 async function loadHandle() {
   try {
@@ -379,35 +375,16 @@ async function loadHandle() {
   } catch { return null; }
 }
 
-/* ===== File System ===== */
+/* ===== File System (画像アップロード用・任意) ===== */
 async function connectDir() {
   try {
     root = await window.showDirectoryPicker({mode:'readwrite'});
     await saveHandle(root);
     updateConnStatus();
-    await loadAll();
-    showTab('products');
-    toast('接続しました：' + root.name, 'ok');
+    toast('フォルダを接続しました：' + root.name, 'ok');
   } catch(e) {
     if (e.name !== 'AbortError') toast('接続に失敗しました', 'err');
   }
-}
-
-async function getFile(path) {
-  const parts = path.split('/');
-  let dir = root;
-  for (let i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i]);
-  return (await dir.getFileHandle(parts[parts.length-1])).getFile();
-}
-
-async function writeFile(path, content) {
-  const parts = path.split('/');
-  let dir = root;
-  for (let i = 0; i < parts.length - 1; i++) dir = await dir.getDirectoryHandle(parts[i], {create:true});
-  const fh = await dir.getFileHandle(parts[parts.length-1], {create:true});
-  const w = await fh.createWritable();
-  await w.write(content);
-  await w.close();
 }
 
 async function copyImg(file, subdir) {
@@ -421,24 +398,28 @@ async function copyImg(file, subdir) {
   return subdir + '/' + file.name;
 }
 
-async function readJson(path) {
-  try { const f = await getFile(path); return JSON.parse(await f.text()); }
-  catch { return null; }
-}
-
-async function writeJson(path, data) {
-  await writeFile(path, JSON.stringify(data, null, 2));
+/* ===== GitHub data load ===== */
+async function loadAll() {
+  const [pr, ar] = await Promise.all([
+    fetch(`${GH_RAW}/data/products.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${GH_RAW}/data/articles.json?t=${Date.now()}`).then(r => r.ok ? r.json() : []).catch(() => []),
+  ]);
+  products = pr || [];
+  articles = ar || [];
 }
 
 /* ===== Init ===== */
 async function init() {
+  // フォルダをサイレント再接続（任意）
   const h = await loadHandle();
-  if (h) { root = h; updateConnStatus(); await loadAll(); showTab('products'); }
-}
+  if (h) { root = h; }
+  updateConnStatus();
 
-async function loadAll() {
-  products = (await readJson('data/products.json')) || [];
-  articles = (await readJson('data/articles.json')) || [];
+  // GitHubからデータ取得（認証不要）
+  await loadAll();
+
+  document.getElementById('screen-loading').style.display = 'none';
+  showTab('products');
 }
 
 function updateConnStatus() {
@@ -449,16 +430,21 @@ function updateConnStatus() {
 
 /* ===== Tabs ===== */
 function showTab(tab) {
-  if (!root) { toast('フォルダを先に接続してください', 'err'); return; }
-  ['connect','products','articles'].forEach(s => {
+  ['loading','products','articles'].forEach(s => {
     document.getElementById('screen-' + s).style.display = 'none';
   });
   document.getElementById('screen-' + tab).style.display = 'block';
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+  const tabEl = document.getElementById('tab-' + tab);
+  if (tabEl) tabEl.classList.add('active');
   document.getElementById('page-title').textContent = tab === 'products' ? '商品管理' : '記事管理';
   if (tab === 'products') renderProducts();
   if (tab === 'articles') renderArticles();
+}
+
+/* ===== Dirty flag ===== */
+function markDirty() {
+  document.getElementById('publish-status').textContent = '⚠ 未公開の変更あり';
 }
 
 /* ===== Products ===== */
@@ -466,7 +452,7 @@ function renderProducts() {
   document.getElementById('products-count').textContent = `（${products.length}件）`;
   const tb = document.getElementById('products-body');
   if (!products.length) {
-    tb.innerHTML = '<tr><td colspan="5"><div class="empty">商品がまだありません。</div></td></tr>';
+    tb.innerHTML = '<tr><td colspan="6"><div class="empty">商品がまだありません。</div></td></tr>';
     return;
   }
   tb.innerHTML = products.map((p, i) => `
@@ -521,23 +507,25 @@ function openProductModal(idx = null) {
 
 function editProduct(i) { openProductModal(i); }
 
-async function delProduct(i) {
+function delProduct(i) {
   if (!confirm(`「${products[i].title}」を削除しますか？`)) return;
   products.splice(i, 1);
-  await writeJson('data/products.json', products);
+  markDirty();
   renderProducts();
-  toast('削除しました', 'ok');
+  toast('削除しました。GitHubに公開すると反映されます。', 'ok');
 }
 
-async function saveProduct() {
+function saveProduct() {
   const title = document.getElementById('p-title').value.trim();
   if (!title) { toast('商品名を入力してください', 'err'); return; }
 
-  // Upload new images
   const imgs = [...pExistImages];
   for (const f of pNewImages) {
-    try { imgs.push(await copyImg(f, 'images/products')); }
-    catch { toast('画像の保存に失敗: ' + f.name, 'err'); return; }
+    const path = 'images/products/' + f.name;
+    imgs.push(path);
+    if (!pendingImages.find(p => p.path === path)) {
+      pendingImages.push({file: f, path});
+    }
   }
 
   const price = parseInt(document.getElementById('p-price').value) || 0;
@@ -562,17 +550,23 @@ async function saveProduct() {
   if (editPIdx !== null) products[editPIdx] = data;
   else products.push(data);
 
-  await writeJson('data/products.json', products);
+  markDirty();
   closeModal('modal-product');
   renderProducts();
-  toast('保存しました', 'ok');
+  toast('保存しました。「GitHubに公開」で反映されます。', 'ok');
+}
+
+function imgSrc(src) {
+  if (!src) return '';
+  if (src.startsWith('http')) return src;
+  return `${GH_RAW}/${src}`;
 }
 
 function renderProductImgList() {
   const list = document.getElementById('p-img-list');
   const addBtn = `<label class="img-add-label" for="p-images-input" title="画像を追加">＋</label>`;
   const existHtml = pExistImages.map((src, i) =>
-    `<div class="img-item"><img src="../${src}" onerror="this.parentNode.style.background='#f3f4f6'">
+    `<div class="img-item"><img src="${imgSrc(src)}" onerror="this.parentNode.style.background='#f3f4f6'">
     <button class="img-remove" onclick="removeExistImg(${i})">✕</button></div>`).join('');
   const newHtml = pNewImages.map((f, i) => {
     const url = URL.createObjectURL(f);
@@ -646,22 +640,25 @@ function openArticleModal(idx = null) {
 
 function editArticle(i) { openArticleModal(i); }
 
-async function delArticle(i) {
+function delArticle(i) {
   if (!confirm(`「${articles[i].title}」を削除しますか？`)) return;
   articles.splice(i, 1);
-  await writeJson('data/articles.json', articles);
+  markDirty();
   renderArticles();
-  toast('削除しました', 'ok');
+  toast('削除しました。GitHubに公開すると反映されます。', 'ok');
 }
 
-async function saveArticle() {
+function saveArticle() {
   const title = document.getElementById('a-title').value.trim();
   if (!title) { toast('タイトルを入力してください', 'err'); return; }
 
   let thumb = aExistThumb;
   if (aNewThumb) {
-    try { thumb = await copyImg(aNewThumb, 'images/articles'); }
-    catch { toast('画像の保存に失敗しました', 'err'); return; }
+    const path = 'images/articles/' + aNewThumb.name;
+    thumb = path;
+    if (!pendingImages.find(p => p.path === path)) {
+      pendingImages.push({file: aNewThumb, path});
+    }
   }
 
   const tags = document.getElementById('a-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
@@ -681,10 +678,10 @@ async function saveArticle() {
   if (editAIdx !== null) articles[editAIdx] = data;
   else articles.push(data);
 
-  await writeJson('data/articles.json', articles);
+  markDirty();
   closeModal('modal-article');
   renderArticles();
-  toast('保存しました', 'ok');
+  toast('保存しました。「GitHubに公開」で反映されます。', 'ok');
 }
 
 function renderArticleThumbList() {
@@ -694,7 +691,7 @@ function renderArticleThumbList() {
     const url = URL.createObjectURL(aNewThumb);
     list.innerHTML = `<div class="img-item"><img src="${url}"><button class="img-remove" onclick="removeNewThumb()">✕</button></div>`;
   } else if (aExistThumb) {
-    list.innerHTML = `<div class="img-item"><img src="../${aExistThumb}" onerror="this.parentNode.style.background='#f3f4f6'">
+    list.innerHTML = `<div class="img-item"><img src="${imgSrc(aExistThumb)}" onerror="this.parentNode.style.background='#f3f4f6'">
       <button class="img-remove" onclick="removeExistThumb()">✕</button></div>`;
   } else {
     list.innerHTML = addBtn;
@@ -708,7 +705,7 @@ function onArticleThumb(input) {
 }
 
 function removeExistThumb() { aExistThumb = ''; renderArticleThumbList(); }
-function removeNewThumb()   { aNewThumb = null;   renderArticleThumbList(); }
+function removeNewThumb()   { aNewThumb = null; renderArticleThumbList(); }
 
 /* ===== Modal ===== */
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -720,18 +717,13 @@ function toast(msg, type='') {
   el.textContent = msg;
   el.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 init();
 
 /* ===== GitHub Publish ===== */
-const GH_REPO = 'sumomosumirehana-byte/gochiso-site';
-const GH_API  = 'https://api.github.com';
-
 async function publishToGitHub() {
-  if (!root) { toast('フォルダを先に接続してください', 'err'); return; }
-
   let token = localStorage.getItem('gh-token');
   if (!token) {
     token = prompt('GitHub Personal Access Token を入力してください\n\n取得方法：GitHub → Settings → Developer settings\n→ Personal access tokens → Tokens (classic)\n→ Generate new token → repo にチェック');
@@ -747,11 +739,19 @@ async function publishToGitHub() {
   stat.textContent = '';
 
   try {
-    await pushJson('data/products.json', token);
-    stat.textContent = '✓ products.json';
-    await pushJson('data/articles.json', token);
-    stat.textContent = '✓ JSON 完了。画像を確認中...';
-    await pushNewImages(token);
+    stat.textContent = '商品データを送信中...';
+    await pushJsonData('data/products.json', products, token);
+    stat.textContent = '記事データを送信中...';
+    await pushJsonData('data/articles.json', articles, token);
+
+    if (pendingImages.length) {
+      stat.textContent = `画像をアップロード中（${pendingImages.length}件）...`;
+      for (const {file, path} of pendingImages) {
+        await uploadImage(file, path, token);
+      }
+      pendingImages = [];
+    }
+
     stat.innerHTML = '✅ 公開完了！<br>1〜2分で反映されます。';
     toast('GitHubに公開しました', 'ok');
   } catch(e) {
@@ -768,18 +768,14 @@ async function publishToGitHub() {
   }
 }
 
-async function pushJson(filePath, token) {
-  let text;
-  try { const f = await getFile(filePath); text = await f.text(); }
-  catch { return; }
-
+async function pushJsonData(filePath, data, token) {
+  const text = JSON.stringify(data, null, 2);
   const sha = await getGhSha(filePath, token);
   const body = {
     message: `管理画面から更新: ${filePath.split('/').pop()}`,
     content: b64Encode(text),
   };
   if (sha) body.sha = sha;
-
   const res = await fetch(`${GH_API}/repos/${GH_REPO}/contents/${filePath}`, {
     method: 'PUT',
     headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
@@ -788,30 +784,16 @@ async function pushJson(filePath, token) {
   if (!res.ok) { const e = await res.json(); throw new Error(e.message || filePath + ' の更新に失敗'); }
 }
 
-async function pushNewImages(token) {
-  for (const dir of ['images/products', 'images/articles']) {
-    let dirHandle;
-    try {
-      let d = root;
-      for (const p of dir.split('/')) d = await d.getDirectoryHandle(p);
-      dirHandle = d;
-    } catch { continue; }
-
-    for await (const [name, handle] of dirHandle.entries()) {
-      if (handle.kind !== 'file' || !name.match(/\.(jpe?g|png|gif|webp|svg)$/i)) continue;
-      const path = dir + '/' + name;
-      const sha = await getGhSha(path, token);
-      if (sha) continue; // 既に存在
-      const file = await handle.getFile();
-      const buf  = await file.arrayBuffer();
-      const b64  = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      await fetch(`${GH_API}/repos/${GH_REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `画像を追加: ${name}`, content: b64 }),
-      });
-    }
-  }
+async function uploadImage(file, path, token) {
+  const sha = await getGhSha(path, token);
+  const buf = await file.arrayBuffer();
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const res = await fetch(`${GH_API}/repos/${GH_REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: `画像を追加: ${file.name}`, content: b64, ...(sha ? {sha} : {}) }),
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || path + ' のアップロードに失敗'); }
 }
 
 async function getGhSha(path, token) {
