@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お取り寄せセット購入｜ごちそうスタイル</title>
+  <meta name="description" content="催事・物産展で人気の全国グルメをセットでお取り寄せ。銀行振込でご購入いただけます。">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ─── Sets page extras ─── */
+    .page-hero-sm {
+      background: linear-gradient(135deg, var(--accent) 0%, #c07070 100%);
+      color: #fff;
+      padding: 3.5rem 1rem 3rem;
+      text-align: center;
+    }
+    .page-hero-sm .section-label { color: rgba(255,255,255,0.75); }
+    .page-hero-sm h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); margin: 0.5rem 0 0.75rem; }
+    .page-hero-sm p  { font-size: 0.95rem; opacity: 0.88; max-width: 520px; margin: 0 auto; }
+
+    /* Filter tabs – reuse from products/articles pages */
+    .filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .filter-tab {
+      padding: 0.45rem 1.1rem; border-radius: 20px; border: 1.5px solid var(--border);
+      background: #fff; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      color: var(--text-muted); transition: all 0.15s;
+    }
+    .filter-tab.active, .filter-tab:hover {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+
+    /* Sets grid */
+    .sets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .set-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .set-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .set-thumb {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: var(--bg-alt);
+    }
+    .set-thumb.thumb-sweets { background: #fff0f3; }
+    .set-thumb.thumb-meal   { background: #fff8ee; }
+    .set-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .set-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+    .set-brand { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .set-name  { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; line-height: 1.35; }
+    .set-items { list-style: none; margin: 0 0 1rem; padding: 0; }
+    .set-items li {
+      font-size: 0.8rem; color: var(--text-muted);
+      padding: 0.18rem 0 0.18rem 1rem;
+      position: relative;
+      border-bottom: 1px dashed var(--border);
+    }
+    .set-items li:last-child { border-bottom: none; }
+    .set-items li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-size: 0.7rem; }
+
+    .set-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .set-price {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .set-price small {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    /* ─── Order Modal ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+    }
+    .modal-overlay.open { display: block; }
+
+    .order-modal {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .modal-head {
+      background: var(--accent);
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-head h2 { font-size: 1rem; }
+    .modal-close {
+      background: none; border: none; color: #fff; font-size: 1.4rem;
+      cursor: pointer; line-height: 1; padding: 0 0.25rem;
+    }
+
+    .modal-body { padding: 1.5rem; }
+
+    .order-set-info {
+      background: var(--bg-alt);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .order-set-name { font-weight: 700; margin-bottom: 0.3rem; }
+    .order-set-brand { font-size: 0.78rem; color: var(--text-muted); }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+    .qty-label { font-weight: 600; font-size: 0.875rem; flex: 1; }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qty-btn {
+      width: 36px; height: 36px;
+      background: #f9fafb; border: none;
+      font-size: 1.1rem; cursor: pointer;
+      color: var(--text); transition: background 0.1s;
+    }
+    .qty-btn:hover { background: #e5e7eb; }
+    .qty-num {
+      width: 48px; text-align: center;
+      font-size: 1rem; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1rem;
+      background: #fff8f8;
+      border: 1.5px solid #ffd5d5;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .total-label { font-size: 0.85rem; font-weight: 600; }
+    .total-amount {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .total-note { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Step 2 form */
+    .form-sep {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+    .form-step-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .fg {
+      margin-bottom: 0.9rem;
+    }
+    .fg label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.3rem;
+    }
+    .fg label .req { color: #ef4444; margin-left: 0.2rem; }
+    .fg input, .fg textarea, .fg select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.875rem;
+      color: #111;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+    .fg input:focus, .fg textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255,153,153,0.15);
+    }
+    .fg textarea { resize: vertical; min-height: 70px; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    .bank-preview {
+      background: #f0faf5;
+      border: 1px solid #a7d7be;
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.8rem;
+      line-height: 1.9;
+    }
+    .bank-preview strong { display: block; font-size: 0.72rem; color: #2d6a4f; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.35rem; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .cancel-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.75rem;
+      line-height: 1.6;
+    }
+
+    /* Loading / empty */
+    .sets-loading { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">
+      <img src="images/logo.png" alt="ごちそうスタイル" class="logo-img">
+      <span class="logo-text">ごちそうスタイル</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNav">
+      <ul>
+        <li><a href="products.html">商品一覧</a></li>
+        <li><a href="sets.html" class="active">セット購入</a></li>
+        <li><a href="articles.html">おすすめ記事</a></li>
+        <li class="has-dropdown">
+          <a href="#">ご依頼・ご相談 ▾</a>
+          <ul class="dropdown">
+            <li><a href="request-feature.html">商品掲載・紹介のご依頼</a></li>
+            <li><a href="request-dispatch.html">催事への販売員紹介のご依頼</a></li>
+            <li><a href="request-exhibition.html">催事出展のご相談</a></li>
+          </ul>
+        </li>
+        <li><a href="recruit.html">販売員募集</a></li>
+        <li><a href="certification.html">資格制度</a></li>
+        <li><a href="company.html">会社概要</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="page-hero-sm">
+  <span class="section-label">SET ITEMS</span>
+  <h1>お取り寄せセット</h1>
+  <p>催事・物産展で出会った全国のごちそうをセットでお届け。<br>銀行振込でご購入いただけます。</p>
+</section>
+
+<!-- ===== Sets ===== -->
+<section class="section">
+  <div class="container">
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <button class="filter-tab active" data-filter="all">すべて</button>
+      <button class="filter-tab" data-filter="sweets">🍡 スイーツ</button>
+      <button class="filter-tab" data-filter="meal">🍜 お食事</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="sets-grid" id="sets-grid">
+      <p class="sets-loading">読み込み中...</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== How to buy ===== -->
+<section class="section section-alt" style="padding-top:3rem;padding-bottom:3rem">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:1.75rem">
+      <span class="section-label">HOW TO BUY</span>
+      <h2>ご購入の流れ</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;max-width:800px;margin:0 auto">
+      <div style="text-align:center;padding:1.25rem">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🛒</div>
+        <div style="font-weight:700;margin-bottom:0.4rem">① セットを選ぶ</div>
+        <p style="font-size:0.82rem;color:var(--text-muted)">お好みのセットを選び、数量を確定してください。</p>
+      </div>
+      <div style="text-align:center;padding:1.25rem">
+        <div style="font-size:2rem;margin-bottom:0.6rem">📝</div>
+        <div style="font-weight:700;margin-bottom:0.4rem">② お客様情報を入力</div>
+        <p style="font-size:0.82rem;color:var(--text-muted)">お名前・メールアドレス・お届け先住所をご入力ください。</p>
+      </div>
+      <div style="text-align:center;padding:1.25rem">
+        <div style="font-size:2rem;margin-bottom:0.6rem">🏦</div>
+        <div style="font-weight:700;margin-bottom:0.4rem">③ 銀行振込</div>
+        <p style="font-size:0.82rem;color:var(--text-muted)">ご注文後、振込先口座へ<strong>5営業日以内</strong>にお振込みください。</p>
+      </div>
+      <div style="text-align:center;padding:1.25rem">
+        <div style="font-size:2rem;margin-bottom:0.6rem">📦</div>
+        <div style="font-weight:700;margin-bottom:0.4rem">④ 発送</div>
+        <p style="font-size:0.82rem;color:var(--text-muted)">入金確認後、順次発送いたします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-banner">
+  <div class="container">
+    <span class="section-label">CONTACT</span>
+    <h2>ご不明な点はお気軽に</h2>
+    <p>ご注文・商品に関するお問い合わせはメールにてお受けしています。</p>
+    <div class="btn-group">
+      <a href="request-feature.html" class="btn btn-primary">お問い合わせ</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">ごちそうスタイル</span>
+        <p>催事・物産展で人気の全国のこだわり食品をお取り寄せで。<br>インフィニスタイル株式会社が運営しています。</p>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <a href="https://www.instagram.com/infinistyle/" target="_blank" rel="noopener" style="font-size:0.8rem;color:rgba(255,255,255,0.55);">Instagram</a>
+          <a href="https://www.youtube.com/@gochiso-style" target="_blank" rel="noopener" style="font-size:0.8rem;color:rgba(255,255,255,0.55);">YouTube</a>
+        </div>
+      </div>
+      <div class="footer-nav">
+        <h4>コンテンツ</h4>
+        <ul>
+          <li><a href="products.html">商品一覧</a></li>
+          <li><a href="sets.html">セット購入</a></li>
+          <li><a href="articles.html">おすすめ記事</a></li>
+          <li><a href="https://www.youtube.com/@gochiso-style" target="_blank" rel="noopener">YouTube</a></li>
+          <li><a href="https://www.instagram.com/infinistyle/" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>ご依頼・採用</h4>
+        <ul>
+          <li><a href="request-feature.html">商品掲載のご依頼</a></li>
+          <li><a href="request-dispatch.html">販売員紹介のご依頼</a></li>
+          <li><a href="request-exhibition.html">催事出展のご相談</a></li>
+          <li><a href="recruit.html">販売員募集</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>会社情報</h4>
+        <ul>
+          <li><a href="company.html">会社概要</a></li>
+          <li><a href="#">プライバシーポリシー</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 インフィニスタイル株式会社</p>
+      <div class="footer-links"><a href="#">プライバシーポリシー</a></div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== Order Modal ===== -->
+<div class="modal-overlay" id="order-overlay" onclick="overlayClose(event)">
+  <div class="order-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h2 id="modal-title">ご注文内容の確認</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Set info -->
+      <div class="order-set-info">
+        <div class="order-set-name" id="modal-set-name"></div>
+        <div class="order-set-brand" id="modal-set-brand"></div>
+      </div>
+
+      <!-- Quantity -->
+      <div class="qty-row">
+        <span class="qty-label">数量</span>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-num" id="qty-display">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">＋</button>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="total-row">
+        <div>
+          <div class="total-label">合計金額</div>
+          <div class="total-note">税込・送料込</div>
+        </div>
+        <div class="total-amount" id="total-display"></div>
+      </div>
+
+      <!-- Bank preview -->
+      <div class="bank-preview">
+        <strong>お振込み先</strong>
+        <!-- ▼▼▼ 振込先口座情報をここに入力してください ▼▼▼ -->
+        〇〇銀行　〇〇支店　普通　0000000<br>
+        口座名義：インフィニスタイル（カ
+        <!-- ▲▲▲ -->
+      </div>
+
+      <hr class="form-sep">
+      <div class="form-step-title">お客様情報を入力してください</div>
+
+      <!-- Order form -->
+      <!-- ▼ action の YOUR_FORM_ID を Formspree のフォームIDに変更してください -->
+      <form id="order-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+
+        <!-- Hidden order fields -->
+        <input type="hidden" name="_subject" value="【ごちそうスタイル】ご注文を受け付けました">
+        <input type="hidden" name="_next" id="form-next">
+        <input type="hidden" name="商品名"   id="form-set-name">
+        <input type="hidden" name="ブランド" id="form-set-brand">
+        <input type="hidden" name="数量"     id="form-qty">
+        <input type="hidden" name="合計金額" id="form-total">
+        <input type="hidden" name="単価"     id="form-unit-price">
+
+        <div class="form-grid-2">
+          <div class="fg">
+            <label>お名前<span class="req">*</span></label>
+            <input type="text" name="お名前" required placeholder="山田 花子">
+          </div>
+          <div class="fg">
+            <label>フリガナ</label>
+            <input type="text" name="フリガナ" placeholder="ヤマダ ハナコ">
+          </div>
+        </div>
+
+        <div class="fg">
+          <label>メールアドレス<span class="req">*</span></label>
+          <input type="email" name="_replyto" required placeholder="example@email.com">
+        </div>
+
+        <div class="fg">
+          <label>電話番号<span class="req">*</span></label>
+          <input type="tel" name="電話番号" required placeholder="090-0000-0000">
+        </div>
+
+        <div class="fg">
+          <label>郵便番号<span class="req">*</span></label>
+          <input type="text" name="郵便番号" required placeholder="000-0000" maxlength="8">
+        </div>
+
+        <div class="fg">
+          <label>都道府県<span class="req">*</span></label>
+          <input type="text" name="都道府県" required placeholder="東京都">
+        </div>
+
+        <div class="fg">
+          <label>住所（市区町村以降）<span class="req">*</span></label>
+          <input type="text" name="住所" required placeholder="渋谷区〇〇 1-2-3">
+        </div>
+
+        <div class="fg">
+          <label>建物名・部屋番号</label>
+          <input type="text" name="建物名" placeholder="〇〇マンション 101号">
+        </div>
+
+        <div class="fg">
+          <label>備考・ご要望</label>
+          <textarea name="備考" placeholder="配送希望日など"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+          <button type="submit" class="btn btn-primary" id="submit-btn">注文を確定する →</button>
+        </div>
+
+        <p class="cancel-note">
+          ご注文後、<strong>5営業日以内</strong>に銀行振込をお願いします。<br>
+          期日内に入金が確認できない場合は、自動的にキャンセルとなります。
+        </p>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+/* ===== Sets page ===== */
+
+// ▼ サンクスページのURL（本番URLに合わせて変更）
+const THANKS_URL = './order-thanks.html';
+
+// ▼ 振込先情報（サンクスページにも反映されます）
+const BANK_INFO = {
+  bank:   '〇〇銀行',       // 例: 三菱UFJ銀行
+  branch: '〇〇支店',       // 例: 渋谷支店
+  type:   '普通',
+  number: '0000000',
+  name:   'インフィニスタイル（カ',
+};
+
+let currentSet  = null;
+let currentQty  = 1;
+let allSets     = [];
+
+/* Load & render */
+async function loadSets() {
+  try {
+    const res = await fetch('./data/sets.json');
+    allSets = await res.json();
+  } catch { allSets = []; }
+  renderSets('all');
+  initFilters();
+}
+
+function renderSets(filter) {
+  const grid = document.getElementById('sets-grid');
+  const list = filter === 'all' ? allSets : allSets.filter(s => s.category === filter && s.published !== false);
+  const published = allSets.filter(s => s.published !== false);
+  const visible = filter === 'all' ? published : published.filter(s => s.category === filter);
+
+  if (!visible.length) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;">該当するセットがありません</p>';
+    return;
+  }
+
+  grid.innerHTML = visible.map(s => {
+    const thumbCls = s.category === 'sweets' ? 'thumb-sweets' : 'thumb-meal';
+    const tagCls   = s.category === 'sweets' ? 'tag-sweets' : 'tag-meal';
+    const tagLbl   = s.category === 'sweets' ? 'スイーツ' : 'お食事';
+    const imgHtml  = (s.images && s.images[0])
+      ? `<img src="${s.images[0]}" alt="${s.name}">`
+      : s.emoji;
+    const items = (s.items || []).map(it => `<li>${it}</li>`).join('');
+    return `
+      <div class="set-card">
+        <div class="set-thumb ${thumbCls}">${imgHtml}</div>
+        <div class="set-body">
+          <div class="set-brand">${s.brand}</div>
+          <div class="set-name">${s.name}</div>
+          <span class="tag ${tagCls}" style="margin-bottom:0.75rem;display:inline-block">${tagLbl}</span>
+          <ul class="set-items">${items}</ul>
+          <div class="set-footer">
+            <div class="set-price">
+              ¥${s.price.toLocaleString()}
+              <small>税込・送料込</small>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openOrder('${s.id}')">購入する</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function initFilters() {
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderSets(tab.dataset.filter);
+    });
+  });
+}
+
+/* Modal */
+function openOrder(id) {
+  currentSet = allSets.find(s => s.id === id);
+  if (!currentSet) return;
+  currentQty = 1;
+  document.getElementById('modal-set-name').textContent  = currentSet.name;
+  document.getElementById('modal-set-brand').textContent = currentSet.brand;
+  updateQtyDisplay();
+  // Pass set info to hidden fields
+  document.getElementById('form-set-name').value  = currentSet.name;
+  document.getElementById('form-set-brand').value = currentSet.brand;
+  document.getElementById('form-next').value = THANKS_URL + '?name=' + encodeURIComponent(currentSet.name);
+  document.getElementById('order-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('order-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function overlayClose(e) {
+  if (e.target === document.getElementById('order-overlay')) closeModal();
+}
+
+function changeQty(delta) {
+  currentQty = Math.max(1, Math.min(9, currentQty + delta));
+  updateQtyDisplay();
+}
+
+function updateQtyDisplay() {
+  const total = currentSet.price * currentQty;
+  document.getElementById('qty-display').textContent  = currentQty;
+  document.getElementById('total-display').textContent = '¥' + total.toLocaleString();
+  document.getElementById('form-qty').value         = currentQty;
+  document.getElementById('form-total').value       = '¥' + total.toLocaleString() + '（税込・送料込）';
+  document.getElementById('form-unit-price').value  = '¥' + currentSet.price.toLocaleString();
+}
+
+/* Submit: save to sessionStorage then let Formspree redirect */
+document.getElementById('order-form').addEventListener('submit', function(e) {
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '送信中...';
+  btn.disabled = true;
+
+  sessionStorage.setItem('gs-order', JSON.stringify({
+    name:  currentSet.name,
+    brand: currentSet.brand,
+    qty:   currentQty,
+    total: currentSet.price * currentQty,
+    bank:  BANK_INFO,
+  }));
+});
+
+loadSets();
+</script>
+</body>
+</html>

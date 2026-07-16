@@ -1,0 +1,184 @@
+[
+  {
+    "id": "set-manuka",
+    "name": "マヌカハニー 美容・健康セット",
+    "brand": "ビー・クリエイト",
+    "description": "ニュージーランド産の希少なマヌカハニー。MGO（メチルグリオキサール）含有量が高く、抗菌・抗酸化作用に優れています。毎日スプーン一杯から気軽に取り入れられます。",
+    "items": [
+      "マヌカハニー UMF8+（MGO182相当）× 1瓶"
+    ],
+    "price": 5800,
+    "emoji": "🍯",
+    "category": "sweets",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-seijuan",
+    "name": "京都の老舗 成寿庵 和菓子セット",
+    "brand": "成寿庵（京都）",
+    "description": "京都の老舗・成寿庵が手がける本格和菓子。職人が丁寧に仕上げた上品な甘さの和菓子を、ご自宅でも楽しめます。お茶との相性が抜群です。",
+    "items": [
+      "限定本わらび餅 × 1",
+      "四季彩々大福餅 8個入 × 1"
+    ],
+    "price": 5150,
+    "emoji": "🍡",
+    "category": "sweets",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-papan",
+    "name": "PAPAN GA PAN フレンチトーストセット",
+    "brand": "PAPAN GA PAN（金沢）",
+    "description": "金沢生まれの新感覚フレンチトースト。こだわりの食パンと特製ソースが生み出す、リッチでとろける味わい。10種の全フレーバーをお届けします。",
+    "items": [
+      "小さいフレンチトースト 10種全フレーバーセット",
+      "バニラ × 1、ピスタチオ × 1（追加）"
+    ],
+    "price": 5400,
+    "emoji": "🍞",
+    "category": "sweets",
+    "published": true,
+    "featured": false
+  },
+  {
+    "id": "set-ichigo",
+    "name": "いちごの里 スイーツセット",
+    "brand": "いちごの里（栃木）",
+    "description": "栃木のいちご産地から生まれた、いちご尽くしのスイーツセット。手づくりジャム6種で様々な品種のおいしさを食べ比べできます。",
+    "items": [
+      "手づくりジャム 6種セット",
+      "いちご餡ドーナツ 10個"
+    ],
+    "price": 5880,
+    "emoji": "🍓",
+    "category": "sweets",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-pudding",
+    "name": "プリン研究所 エアリー 6個セット",
+    "brand": "プリン研究所",
+    "description": "なめらか・固め・とろとろでもない「第3の食感」を実現した特許取得プリン。唯一無二のふわしゅわ食感を6個でたっぷりお楽しみください。",
+    "items": [
+      "エアリー（第3のプリン）× 6個"
+    ],
+    "price": 6480,
+    "emoji": "🍮",
+    "category": "sweets",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-ginger",
+    "name": "GINGER FACTORY 生姜づくしセット",
+    "brand": "GINGER FACTORY",
+    "description": "国産生姜専門店のこだわりセット。ジンジャーシロップ・生姜紅茶・生姜チップスなど、多彩な生姜の魅力をまとめてお届けします。",
+    "items": [
+      "生姜紅茶 飲み比べセット",
+      "生姜チップス × 1袋"
+    ],
+    "price": 5280,
+    "emoji": "🫚",
+    "category": "sweets",
+    "published": true,
+    "featured": false
+  },
+  {
+    "id": "set-sorachi",
+    "name": "十勝豚丼タレ 食べ比べセット",
+    "brand": "ソラチ（北海道）",
+    "description": "北海道・帯広スタイルの豚丼のタレを6種類食べ比べ。通常・ピリ辛・みそ・ねぎ塩・三升漬・いっぴん監修と、バラエティ豊かにご用意しました。",
+    "items": [
+      "十勝豚丼のたれ 275g × 2本",
+      "十勝ピリ辛豚丼のたれ × 1本",
+      "十勝みそ豚丼のたれ × 1本",
+      "十勝ねぎ塩豚丼のたれ × 1本",
+      "三升漬入豚丼のたれ × 1本"
+    ],
+    "price": 5200,
+    "emoji": "🐷",
+    "category": "meal",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-okinawa",
+    "name": "タイラ製麺所 沖縄そばセット",
+    "brand": "タイラ製麺所（沖縄）",
+    "description": "沖縄の製麺所が手がける本格ソーキそば。豚骨のうまみが染み出たスープともちもち麺、自家製コーレーグースをセットでお届けします。",
+    "items": [
+      "ソーキそば 4食セット",
+      "自家製コーレーグース（大）× 1本"
+    ],
+    "price": 5300,
+    "emoji": "🍜",
+    "category": "meal",
+    "published": true,
+    "featured": false
+  },
+  {
+    "id": "set-sampa",
+    "name": "徳島ラーメン 支那そば三八セット",
+    "brand": "支那そば三八（徳島）",
+    "description": "地元に愛される黄金スープの徳島ラーメン「三八」。こだわりの醤油ベーススープと自家製高菜のセット。ご家庭でお店の味を再現できます。",
+    "items": [
+      "まんぷくつけ麺セット",
+      "自家製高菜 300g × 1"
+    ],
+    "price": 5500,
+    "emoji": "🍜",
+    "category": "meal",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-matsusaka",
+    "name": "松阪牛 千力 ご家庭用セット",
+    "brand": "千力（三重・松阪）",
+    "description": "松阪牛の産地・三重県から直送する高品質な和牛「千力」。口の中でとろける脂の甘みと深いうまみをご家庭でお楽しみください。",
+    "items": [
+      "松阪牛 ご家庭発送用のもり（2〜3人前）"
+    ],
+    "price": 6840,
+    "emoji": "🥩",
+    "category": "meal",
+    "published": true,
+    "featured": true
+  },
+  {
+    "id": "set-biryani",
+    "name": "ジョニーのビリヤニ 4種セット",
+    "brand": "ジョニーのビリヤニ",
+    "description": "本場インドの調理法を忠実に再現したビリヤニ。チキン・マトン・えび・ポテトの4種類をセットに。スパイスの香りと旨みが凝縮された本格派のセットです。",
+    "items": [
+      "ジョニー式チキンビリヤニ（中辛）× 1",
+      "ハイデラバードのマトンビリヤニ（中辛）× 1",
+      "えびビリヤニ（辛さひかえめ）× 1",
+      "ポテトビリヤニ（辛さひかえめ）× 1"
+    ],
+    "price": 6000,
+    "emoji": "🍛",
+    "category": "meal",
+    "published": true,
+    "featured": false
+  },
+  {
+    "id": "set-yossou",
+    "name": "長崎 吉宗 夫婦蒸しセット",
+    "brand": "吉宗（長崎）",
+    "description": "長崎で創業150年以上の老舗・吉宗が誇る「夫婦蒸し」。茶碗蒸しと蒸し寿司がセットになった、上品でほっとする長崎の味をご自宅で。",
+    "items": [
+      "茶碗むし × 2個",
+      "蒸寿し × 2個（計4人前）"
+    ],
+    "price": 6318,
+    "emoji": "🥘",
+    "category": "meal",
+    "published": true,
+    "featured": false
+  }
+]

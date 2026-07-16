@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ご注文ありがとうございます｜ごちそうスタイル</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .thanks-wrap {
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 0 1rem 4rem;
+    }
+
+    .thanks-hero {
+      text-align: center;
+      padding: 2.5rem 1.5rem 2rem;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .thanks-icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+    .thanks-hero h1 {
+      font-size: 1.35rem;
+      margin-bottom: 0.6rem;
+      color: var(--accent);
+    }
+    .thanks-hero p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* Order summary */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.45rem 0;
+      font-size: 0.875rem;
+      border-bottom: 1px dashed var(--border);
+    }
+    .order-row:last-child { border-bottom: none; }
+    .order-row-label { color: var(--text-muted); }
+    .order-row-value { font-weight: 600; }
+    .order-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      background: #fff8f8;
+      border: 1.5px solid #ffd5d5;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+    }
+    .order-total-label { font-weight: 600; }
+    .order-total-amount {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Bank info */
+    .bank-card {
+      background: #f0faf5;
+      border: 1.5px solid #82c9a6;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .bank-card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #2d6a4f;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid #a7d7be;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .bank-row {
+      display: flex;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      font-size: 0.875rem;
+      border-bottom: 1px dashed #c5e8d6;
+    }
+    .bank-row:last-child { border-bottom: none; }
+    .bank-row-label {
+      width: 90px;
+      flex-shrink: 0;
+      color: #4a9c72;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .bank-row-value { font-weight: 700; color: #1a4a30; }
+
+    .deadline-card {
+      background: #fff9ec;
+      border: 1.5px solid #f5c842;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .deadline-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #92610a;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .deadline-card p {
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: #5c4000;
+    }
+    .deadline-card strong { color: #92610a; }
+
+    .steps-card { background: #fff; }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 0.85rem;
+    }
+    .step-item:last-child { border-bottom: none; }
+    .step-num {
+      width: 26px; height: 26px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .step-text { line-height: 1.65; }
+    .step-text strong { display: block; margin-bottom: 0.15rem; }
+
+    .back-btn-wrap { text-align: center; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">
+      <img src="images/logo.png" alt="ごちそうスタイル" class="logo-img">
+      <span class="logo-text">ごちそうスタイル</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNav">
+      <ul>
+        <li><a href="products.html">商品一覧</a></li>
+        <li><a href="sets.html">セット購入</a></li>
+        <li><a href="articles.html">おすすめ記事</a></li>
+        <li class="has-dropdown">
+          <a href="#">ご依頼・ご相談 ▾</a>
+          <ul class="dropdown">
+            <li><a href="request-feature.html">商品掲載・紹介のご依頼</a></li>
+            <li><a href="request-dispatch.html">催事への販売員紹介のご依頼</a></li>
+            <li><a href="request-exhibition.html">催事出展のご相談</a></li>
+          </ul>
+        </li>
+        <li><a href="recruit.html">販売員募集</a></li>
+        <li><a href="certification.html">資格制度</a></li>
+        <li><a href="company.html">会社概要</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Content ===== -->
+<div class="thanks-wrap">
+
+  <!-- Hero -->
+  <div class="thanks-hero">
+    <div class="thanks-icon">✅</div>
+    <h1>ご注文ありがとうございます</h1>
+    <p>ご注文を受け付けました。<br>下記の振込先へ<strong>5営業日以内</strong>にお振込みをお願いします。<br>入金確認後、順次発送いたします。</p>
+  </div>
+
+  <!-- Order summary (JS で動的に入れる) -->
+  <div class="card" id="order-summary" style="display:none">
+    <div class="card-title">📋 ご注文内容</div>
+    <div id="order-rows"></div>
+    <div class="order-total-row">
+      <span class="order-total-label">お振込み金額</span>
+      <span class="order-total-amount" id="order-total"></span>
+    </div>
+  </div>
+
+  <!-- Bank info -->
+  <div class="bank-card">
+    <div class="bank-card-title">🏦 お振込み先口座</div>
+    <div id="bank-rows">
+      <!-- JS で書き込む（または直接ハードコード） -->
+    </div>
+  </div>
+
+  <!-- Deadline warning -->
+  <div class="deadline-card">
+    <div class="deadline-title">⚠️ お支払い期限について</div>
+    <p>
+      ご注文日から<strong>5営業日以内</strong>にお振込みをお願いします。<br>
+      期日内に入金が確認できない場合は、<strong>自動的にキャンセル</strong>となります。<br>
+      ご不明な点がございましたら、お気軽にお問い合わせください。
+    </p>
+  </div>
+
+  <!-- Next steps -->
+  <div class="card steps-card">
+    <div class="card-title">📌 今後の流れ</div>
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>銀行振込（5営業日以内）</strong>
+        上記口座へ合計金額をお振込みください。振込手数料はお客様のご負担となります。
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>入金確認のご連絡</strong>
+        入金確認後、メールにてご連絡いたします（1〜2営業日程度）。
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>発送・お届け</strong>
+        順次発送いたします。発送時に追跡番号をお知らせします。
+      </div>
+    </div>
+  </div>
+
+  <!-- Back button -->
+  <div class="back-btn-wrap">
+    <a href="sets.html" class="btn btn-outline">セット一覧に戻る</a>
+    <a href="index.html" class="btn btn-outline" style="margin-left:0.75rem">TOPページへ</a>
+  </div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">ごちそうスタイル</span>
+        <p>催事・物産展で人気の全国のこだわり食品をお取り寄せで。<br>インフィニスタイル株式会社が運営しています。</p>
+      </div>
+      <div class="footer-nav">
+        <h4>コンテンツ</h4>
+        <ul>
+          <li><a href="products.html">商品一覧</a></li>
+          <li><a href="sets.html">セット購入</a></li>
+          <li><a href="articles.html">おすすめ記事</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>会社情報</h4>
+        <ul>
+          <li><a href="company.html">会社概要</a></li>
+          <li><a href="#">プライバシーポリシー</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 インフィニスタイル株式会社</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// ▼▼▼ 振込先情報をここに設定してください ▼▼▼
+const BANK_INFO = {
+  bank:   '〇〇銀行',        // 例: 三菱UFJ銀行
+  branch: '〇〇支店',        // 例: 渋谷支店
+  type:   '普通',
+  number: '0000000',         // 口座番号
+  name:   'インフィニスタイル（カ',  // 口座名義（カタカナ）
+};
+// ▲▲▲
+
+// 銀行情報を描画
+function renderBank(info) {
+  const rows = [
+    ['銀行名', info.bank],
+    ['支店名', info.branch],
+    ['口座種別', info.type],
+    ['口座番号', info.number],
+    ['口座名義', info.name],
+  ];
+  document.getElementById('bank-rows').innerHTML = rows.map(([label, val]) =>
+    `<div class="bank-row">
+      <span class="bank-row-label">${label}</span>
+      <span class="bank-row-value">${val}</span>
+    </div>`
+  ).join('');
+}
+
+// sessionStorage からご注文内容を復元
+function renderOrder() {
+  try {
+    const raw = sessionStorage.getItem('gs-order');
+    if (!raw) return;
+    const o = JSON.parse(raw);
+
+    // 銀行情報を order に保存されていたもので上書き（sets.html と同期）
+    const bank = o.bank || BANK_INFO;
+    renderBank(bank);
+
+    // 注文サマリ
+    const rows = [
+      ['商品名', o.name],
+      ['ブランド', o.brand],
+      ['数量', o.qty + '点'],
+      ['単価', '¥' + (o.total / o.qty).toLocaleString() + '（税込・送料込）'],
+    ];
+    document.getElementById('order-rows').innerHTML = rows.map(([label, val]) =>
+      `<div class="order-row">
+        <span class="order-row-label">${label}</span>
+        <span class="order-row-value">${val}</span>
+      </div>`
+    ).join('');
+    document.getElementById('order-total').textContent = '¥' + o.total.toLocaleString();
+    document.getElementById('order-summary').style.display = 'block';
+
+    sessionStorage.removeItem('gs-order');
+  } catch {
+    renderBank(BANK_INFO);
+  }
+}
+
+renderOrder();
+if (!document.getElementById('order-summary').style.display || document.getElementById('order-summary').style.display === 'none') {
+  renderBank(BANK_INFO);
+}
+</script>
+</body>
+</html>
